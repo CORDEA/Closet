@@ -8,7 +8,7 @@ import androidx.navigation.compose.rememberNavController
 import jp.cordea.closet.ui.home.Home
 
 @Composable
-fun App() {
+fun ClosetApp() {
     AppNavHost(navController = rememberNavController())
 }
 
