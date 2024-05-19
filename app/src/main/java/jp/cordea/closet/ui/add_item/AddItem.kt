@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -36,11 +37,13 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import jp.cordea.closet.R
+import jp.cordea.closet.data.ItemAttribute
+import jp.cordea.closet.data.ItemType
 
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun AddItem() {
+fun AddItem(type: ItemType) {
     val behavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     Scaffold(
         topBar = {
@@ -90,13 +93,11 @@ fun AddItem() {
                     )
                 }
                 item {
-                    Field()
+                    Field(ItemAttribute.SIZE)
                 }
+                content(type)
                 item {
-                    Field()
-                }
-                item {
-                    Field()
+                    Field(ItemAttribute.MATERIAL)
                 }
                 item {
                     HorizontalDivider(
@@ -105,11 +106,20 @@ fun AddItem() {
                 }
                 item { Tag() }
                 item {
-                    Field()
+                    Field(ItemAttribute.TAG)
                 }
             }
         }
     }
+}
+
+private fun LazyListScope.content(type: ItemType) {
+    items(
+        count = type.attributes.size,
+        itemContent = {
+            Field(type.attributes.elementAt(it))
+        }
+    )
 }
 
 @Composable
@@ -130,12 +140,15 @@ private fun Thumbnail() {
 }
 
 @Composable
-private fun Field() {
+private fun Field(attribute: ItemAttribute) {
     OutlinedTextField(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
+            .padding(vertical = 4.dp),
         shape = CircleShape,
+        label = {
+            Text(text = attribute.name)
+        },
         value = "",
         onValueChange = { }
     )
@@ -167,5 +180,5 @@ private fun Chip() {
 @Preview
 @Composable
 private fun Preview() {
-    AddItem()
+    AddItem(ItemType.OUTERWEAR)
 }
