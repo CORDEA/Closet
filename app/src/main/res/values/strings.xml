@@ -1,3 +1,35 @@
 <resources>
     <string name="app_name">Closet</string>
+
+    <string name="type_tops">Tops</string>
+    <string name="type_outerwear">Outerwear</string>
+    <string name="type_pants">Pants</string>
+    <string name="type_skirts">Skirts</string>
+    <string name="type_dresses">Dresses</string>
+    <string name="type_swimwear">Swimwear</string>
+    <string name="type_shoes">Shoes</string>
+    <string name="type_bags">Bags</string>
+    <string name="type_hats">Hats</string>
+    <string name="type_rings">Rings</string>
+    <string name="type_others">Others</string>
+
+    <string name="attribute_material">Material</string>
+    <string name="attribute_size">Size</string>
+    <string name="attribute_bust">Bust</string>
+    <string name="attribute_length">Length</string>
+    <string name="attribute_height">Height</string>
+    <string name="attribute_width">Width</string>
+    <string name="attribute_depth">Depth</string>
+    <string name="attribute_waist">Waist</string>
+    <string name="attribute_hip">Hip</string>
+    <string name="attribute_sleeve_length">Sleeve Length</string>
+    <string name="attribute_shoulder_width">Shoulder Width</string>
+    <string name="attribute_neck_size">Neck Size</string>
+    <string name="attribute_inseam">Inseam</string>
+    <string name="attribute_rise">Rise</string>
+    <string name="attribute_leg_opening">Leg Opening</string>
+    <string name="attribute_knee">Knee</string>
+    <string name="attribute_thigh">Thigh</string>
+    <string name="attribute_head_circumference">Head Circumference</string>
+    <string name="attribute_tag">Tag</string>
 </resources>

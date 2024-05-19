@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import jp.cordea.closet.R
 import jp.cordea.closet.data.ItemAttribute
 import jp.cordea.closet.data.ItemType
+import jp.cordea.closet.ui.toLocalizedString
 
 
 @Composable
@@ -147,7 +148,7 @@ private fun Field(attribute: ItemAttribute) {
             .padding(vertical = 4.dp),
         shape = CircleShape,
         label = {
-            Text(text = attribute.name)
+            Text(text = attribute.toLocalizedString())
         },
         value = "",
         onValueChange = { }

@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import jp.cordea.closet.data.ItemType
+import jp.cordea.closet.ui.toLocalizedString
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -81,7 +82,7 @@ private fun Item(type: ItemType, navController: NavController) {
             modifier = Modifier
                 .align(Alignment.CenterHorizontally)
                 .padding(16.dp),
-            text = type.toString(),
+            text = type.toLocalizedString(),
             style = MaterialTheme.typography.headlineSmall
         )
     }
