@@ -56,6 +56,7 @@ fun ClosetTheme(
         colorScheme = colorScheme,
         typography = Typography,
         shapes = Shapes(
+            medium = RoundedCornerShape(16.dp),
             large = RoundedCornerShape(12.dp),
         ),
         content = content

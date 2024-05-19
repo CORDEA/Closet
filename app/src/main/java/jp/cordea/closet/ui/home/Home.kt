@@ -17,10 +17,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun Home() {
+fun Home(navController: NavController) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -41,7 +43,9 @@ fun Home() {
         },
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { },
+                onClick = {
+                    navController.navigate("type-select")
+                },
                 content = {
                     Icon(
                         imageVector = Icons.Default.Add,
@@ -60,5 +64,5 @@ fun Home() {
 @Preview
 @Composable
 private fun Preview() {
-    Home()
+    Home(rememberNavController())
 }
