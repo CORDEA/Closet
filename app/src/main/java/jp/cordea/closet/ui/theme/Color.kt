@@ -2,10 +2,15 @@ package jp.cordea.closet.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
+val Black50 = Color(0xfffafafa)
+val Black100 = Color(0xffebebeb)
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+val Brown300 = Color(0xffac946d)
+val Brown200 = Color(0xffc19d5e)
+val Brown100 = Color(0xffd9c4a0)
+val Brown50 = Color(0xffefe7d9)
+
+val Pink300 = Color(0xfffb8080)
+val Pink200 = Color(0xffffa4a4)
+val Pink100 = Color(0xffffd3d9)
+val Pink50 = Color(0xffffeef1)
