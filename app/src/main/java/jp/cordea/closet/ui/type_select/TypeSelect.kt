@@ -53,6 +53,7 @@ fun TypeSelect(navController: NavController) {
         ) {
             LazyColumn(
                 contentPadding = PaddingValues(
+                    top = 16.dp,
                     start = 24.dp,
                     end = 24.dp,
                     bottom = 32.dp
