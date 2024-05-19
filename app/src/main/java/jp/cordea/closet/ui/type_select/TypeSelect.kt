@@ -22,11 +22,13 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import jp.cordea.closet.data.ItemType
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun TypeSelect() {
+fun TypeSelect(navController: NavController) {
     val behavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     Scaffold(
         topBar = {
@@ -57,7 +59,7 @@ fun TypeSelect() {
                 )
             ) {
                 ItemType.entries.forEach { type ->
-                    item { Item(type = type) }
+                    item { Item(type, navController) }
                 }
             }
         }
@@ -65,12 +67,14 @@ fun TypeSelect() {
 }
 
 @Composable
-private fun Item(type: ItemType) {
+private fun Item(type: ItemType, navController: NavController) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 12.dp),
-        onClick = {}
+        onClick = {
+            navController.navigate("add-item/${type}")
+        }
     ) {
         Text(
             modifier = Modifier
@@ -85,5 +89,5 @@ private fun Item(type: ItemType) {
 @Preview
 @Composable
 private fun Preview() {
-    TypeSelect()
+    TypeSelect(rememberNavController())
 }
