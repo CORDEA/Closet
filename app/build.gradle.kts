@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.kapt)
     alias(libs.plugins.dagger.hilt.android)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.serialization)
     alias(libs.plugins.ksp)
 }
 
@@ -64,6 +65,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.ui.google.fonts)
     implementation(libs.androidx.material3)
+    implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.room)
     ksp(libs.androidx.room.compiler)
     implementation(libs.dagger.hilt.android)
