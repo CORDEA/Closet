@@ -9,6 +9,7 @@ import jp.cordea.closet.data.ItemType
 import jp.cordea.closet.ui.add_item.AddItem
 import jp.cordea.closet.ui.home.Home
 import jp.cordea.closet.ui.item_details.ItemDetails
+import jp.cordea.closet.ui.settings.Settings
 import jp.cordea.closet.ui.type_select.TypeSelect
 
 @Composable
@@ -33,6 +34,9 @@ private fun AppNavHost(navController: NavHostController) {
             val id = requireNotNull(it.arguments?.getString("id"))
             // TODO
             ItemDetails(ItemType.OUTERWEAR)
+        }
+        composable("settings") {
+            Settings()
         }
     }
 }

@@ -48,7 +48,9 @@ fun Home(navController: NavController) {
                     Text(text = "Home")
                 }, actions = {
                     IconButton(
-                        onClick = {}
+                        onClick = {
+                            navController.navigate("settings")
+                        }
                     ) {
                         Icon(
                             modifier = Modifier.size(24.dp),
