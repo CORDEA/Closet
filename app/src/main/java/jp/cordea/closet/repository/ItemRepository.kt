@@ -3,6 +3,8 @@ package jp.cordea.closet.repository
 import jp.cordea.closet.data.Item
 import jp.cordea.closet.data.ItemType
 import jp.cordea.closet.data.local.ItemDao
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -16,7 +18,7 @@ class ItemRepository @Inject constructor(
 
     suspend fun find(id: String): Item = dao.find(id)
 
-    suspend fun insert(item: Item) = dao.insert(item)
+    suspend fun insert(item: Item) = withContext(Dispatchers.IO) { dao.insert(item) }
 
     suspend fun update(item: Item) = dao.update(item)
 

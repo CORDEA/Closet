@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.AssistChip
@@ -28,6 +29,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -44,7 +47,7 @@ import jp.cordea.closet.ui.toLocalizedString
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun AddItem(type: ItemType) {
+fun AddItem(viewModel: AddItemViewModel, type: ItemType) {
     val behavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     Scaffold(
         topBar = {
@@ -58,6 +61,7 @@ fun AddItem(type: ItemType) {
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
+                    viewModel.onAddClicked()
                 },
                 content = {
                     Icon(
@@ -94,11 +98,11 @@ fun AddItem(type: ItemType) {
                     )
                 }
                 item {
-                    Field(ItemAttribute.SIZE)
+                    Field(viewModel, ItemAttribute.SIZE)
                 }
-                content(type)
+                content(viewModel, type)
                 item {
-                    Field(ItemAttribute.MATERIAL)
+                    Field(viewModel, ItemAttribute.MATERIAL)
                 }
                 item {
                     HorizontalDivider(
@@ -107,18 +111,18 @@ fun AddItem(type: ItemType) {
                 }
                 item { Tag() }
                 item {
-                    Field(ItemAttribute.TAG)
+                    Field(viewModel, ItemAttribute.TAG)
                 }
             }
         }
     }
 }
 
-private fun LazyListScope.content(type: ItemType) {
+private fun LazyListScope.content(viewModel: AddItemViewModel, type: ItemType) {
     items(
         count = type.attributes.size,
         itemContent = {
-            Field(type.attributes.elementAt(it))
+            Field(viewModel, type.attributes.elementAt(it))
         }
     )
 }
@@ -141,7 +145,8 @@ private fun Thumbnail() {
 }
 
 @Composable
-private fun Field(attribute: ItemAttribute) {
+private fun Field(viewModel: AddItemViewModel, attribute: ItemAttribute) {
+    val value by viewModel.state.collectAsState()
     OutlinedTextField(
         modifier = Modifier
             .fillMaxWidth()
@@ -150,8 +155,16 @@ private fun Field(attribute: ItemAttribute) {
         label = {
             Text(text = attribute.toLocalizedString())
         },
-        value = "",
-        onValueChange = { }
+        value = value.values.getOrDefault(attribute, ""),
+        keyboardActions = KeyboardActions(
+            onDone = {
+                viewModel.onTextSubmitted(attribute)
+            }
+        ),
+        onValueChange = {
+            viewModel.onTextChanged(attribute, it)
+        },
+        singleLine = true
     )
 }
 
@@ -181,5 +194,5 @@ private fun Chip() {
 @Preview
 @Composable
 private fun Preview() {
-    AddItem(ItemType.OUTERWEAR)
+//    AddItem(ItemType.OUTERWEAR)
 }

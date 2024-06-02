@@ -65,6 +65,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.ui.google.fonts)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.hilt.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.room)
     implementation(libs.androidx.room.ktx)

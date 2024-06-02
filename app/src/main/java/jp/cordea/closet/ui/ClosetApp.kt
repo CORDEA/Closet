@@ -1,6 +1,7 @@
 package jp.cordea.closet.ui
 
 import androidx.compose.runtime.Composable
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -28,7 +29,7 @@ private fun AppNavHost(navController: NavHostController) {
         }
         composable("add-item/{type}") {
             val type = requireNotNull(it.arguments?.getString("type"))
-            AddItem(ItemType.valueOf(type))
+            AddItem(hiltViewModel(), ItemType.valueOf(type))
         }
         composable("item-details/{id}") {
             val id = requireNotNull(it.arguments?.getString("id"))
