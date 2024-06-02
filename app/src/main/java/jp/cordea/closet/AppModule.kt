@@ -21,7 +21,7 @@ object AppModule {
         context,
         AppDatabase::class.java,
         "jp.cordea.closet.database"
-    )
+    ).build()
 
     @Provides
     @Singleton
