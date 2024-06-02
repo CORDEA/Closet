@@ -12,7 +12,7 @@ import javax.inject.Singleton
 class ItemRepository @Inject constructor(
     private val dao: ItemDao
 ) {
-    suspend fun findAll(): List<Item> = dao.findAll()
+    suspend fun findAll(): List<Item> = withContext(Dispatchers.IO) { dao.findAll() }
 
     suspend fun find(type: ItemType): List<Item> = dao.findByType(type)
 

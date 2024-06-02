@@ -22,7 +22,7 @@ fun ClosetApp() {
 private fun AppNavHost(navController: NavHostController) {
     NavHost(navController = navController, startDestination = "home") {
         composable("home") {
-            Home(navController)
+            Home(navController, hiltViewModel())
         }
         composable("type-select") {
             TypeSelect(navController)
