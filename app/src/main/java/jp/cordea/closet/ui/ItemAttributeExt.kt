@@ -6,6 +6,7 @@ import jp.cordea.closet.R
 import jp.cordea.closet.data.ItemAttribute
 import jp.cordea.closet.data.ItemAttribute.BUST
 import jp.cordea.closet.data.ItemAttribute.DEPTH
+import jp.cordea.closet.data.ItemAttribute.DESCRIPTION
 import jp.cordea.closet.data.ItemAttribute.HEAD_CIRCUMFERENCE
 import jp.cordea.closet.data.ItemAttribute.HEIGHT
 import jp.cordea.closet.data.ItemAttribute.HIP
@@ -21,6 +22,7 @@ import jp.cordea.closet.data.ItemAttribute.SIZE
 import jp.cordea.closet.data.ItemAttribute.SLEEVE_LENGTH
 import jp.cordea.closet.data.ItemAttribute.TAG
 import jp.cordea.closet.data.ItemAttribute.THIGH
+import jp.cordea.closet.data.ItemAttribute.TITLE
 import jp.cordea.closet.data.ItemAttribute.WAIST
 import jp.cordea.closet.data.ItemAttribute.WIDTH
 
@@ -46,5 +48,7 @@ fun ItemAttribute.toLocalizedString(): String {
         THIGH -> stringResource(R.string.attribute_thigh)
         HEAD_CIRCUMFERENCE -> stringResource(R.string.attribute_head_circumference)
         TAG -> stringResource(R.string.attribute_tag)
+        TITLE -> stringResource(R.string.attribute_title)
+        DESCRIPTION -> stringResource(R.string.attribute_description)
     }
 }

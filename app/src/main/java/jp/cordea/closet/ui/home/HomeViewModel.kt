@@ -20,7 +20,7 @@ class HomeViewModel @Inject constructor(
         viewModelScope.launch {
             _state.value = HomeUiState.Loaded(
                 items = repository.findAll()
-                    .map { HomeItem(it.id, "", it.imagePath) }
+                    .map { HomeItem(it.id, it.title, it.imagePath) }
             )
         }
     }

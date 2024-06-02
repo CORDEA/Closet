@@ -1,6 +1,8 @@
 package jp.cordea.closet.data
 
 enum class ItemAttribute {
+    TITLE,
+    DESCRIPTION,
     MATERIAL,
     SIZE,
     BUST,

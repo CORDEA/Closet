@@ -48,6 +48,8 @@ class AddItemViewModel @Inject constructor(
             repository.insert(
                 Item(
                     id = UUID.randomUUID().toString(),
+                    title = state.values[ItemAttribute.TITLE] ?: "",
+                    description = state.values[ItemAttribute.DESCRIPTION] ?: "",
                     type = state.type,
                     createdAt = Date(),
                     updatedAt = Date(),

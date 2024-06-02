@@ -13,6 +13,8 @@
     <string name="type_rings">Rings</string>
     <string name="type_others">Others</string>
 
+    <string name="attribute_title">Title</string>
+    <string name="attribute_description">Description</string>
     <string name="attribute_material">Material</string>
     <string name="attribute_size">Size</string>
     <string name="attribute_bust">Bust</string>

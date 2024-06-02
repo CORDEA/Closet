@@ -13,6 +13,8 @@ class Item(
     @ColumnInfo(name = "updated_at") val updatedAt: Date,
     @ColumnInfo(name = "image_path") val imagePath: String,
     @ColumnInfo(name = "material") val material: String,
+    @ColumnInfo(name = "title") val title: String,
+    @ColumnInfo(name = "description") val description: String,
     @ColumnInfo(name = "size") val size: String,
     @ColumnInfo(name = "bust") val bust: Float,
     @ColumnInfo(name = "length") val length: Float,

@@ -98,6 +98,17 @@ fun AddItem(viewModel: AddItemViewModel, type: ItemType) {
                     )
                 }
                 item {
+                    Field(viewModel, ItemAttribute.TITLE)
+                }
+                item {
+                    DescriptionField(viewModel)
+                }
+                item {
+                    HorizontalDivider(
+                        modifier = Modifier.padding(vertical = 16.dp)
+                    )
+                }
+                item {
                     Field(viewModel, ItemAttribute.SIZE)
                 }
                 content(viewModel, type)
@@ -145,7 +156,10 @@ private fun Thumbnail() {
 }
 
 @Composable
-private fun Field(viewModel: AddItemViewModel, attribute: ItemAttribute) {
+private fun Field(
+    viewModel: AddItemViewModel,
+    attribute: ItemAttribute,
+) {
     val value by viewModel.state.collectAsState()
     OutlinedTextField(
         modifier = Modifier
@@ -165,6 +179,29 @@ private fun Field(viewModel: AddItemViewModel, attribute: ItemAttribute) {
             viewModel.onTextChanged(attribute, it)
         },
         singleLine = true
+    )
+}
+
+@Composable
+private fun DescriptionField(viewModel: AddItemViewModel) {
+    val value by viewModel.state.collectAsState()
+    OutlinedTextField(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        shape = RoundedCornerShape(32.dp),
+        label = {
+            Text(text = ItemAttribute.DESCRIPTION.toLocalizedString())
+        },
+        value = value.values.getOrDefault(ItemAttribute.DESCRIPTION, ""),
+        keyboardActions = KeyboardActions(
+            onDone = {
+                viewModel.onTextSubmitted(ItemAttribute.DESCRIPTION)
+            }
+        ),
+        onValueChange = {
+            viewModel.onTextChanged(ItemAttribute.DESCRIPTION, it)
+        },
     )
 }
 
