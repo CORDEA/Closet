@@ -1,11 +1,13 @@
 package jp.cordea.closet.ui.add_item
 
 import android.net.Uri
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jp.cordea.closet.data.Item
 import jp.cordea.closet.data.ItemAttribute
+import jp.cordea.closet.data.ItemType
 import jp.cordea.closet.repository.ItemRepository
 import jp.cordea.closet.repository.ThumbnailRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,12 +19,19 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AddItemViewModel @Inject constructor(
+    savedStateHandle: SavedStateHandle,
     private val itemRepository: ItemRepository,
     private val thumbnailRepository: ThumbnailRepository
 ) : ViewModel() {
-
     private val _state = MutableStateFlow(AddItemUiState())
     val state get() = _state.asStateFlow()
+
+    init {
+        val type = requireNotNull(savedStateHandle.get<String>("type")?.let {
+            ItemType.valueOf(it)
+        })
+        _state.value = _state.value.copy(type = type)
+    }
 
     fun onTextChanged(attribute: ItemAttribute, value: String) {
         val state = _state.value

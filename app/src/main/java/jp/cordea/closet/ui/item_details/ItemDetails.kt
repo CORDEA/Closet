@@ -19,6 +19,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -41,6 +42,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import jp.cordea.closet.R
 import jp.cordea.closet.data.ItemAttribute
@@ -50,7 +52,7 @@ import java.util.Date
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun ItemDetails(viewModel: ItemDetailsViewModel) {
+fun ItemDetails(navController: NavController, viewModel: ItemDetailsViewModel) {
     val value by viewModel.state.collectAsState()
     val behavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     Scaffold(
@@ -58,6 +60,16 @@ fun ItemDetails(viewModel: ItemDetailsViewModel) {
             TopAppBar(
                 title = {
                     Text(text = value.values.getOrDefault(ItemAttribute.TITLE, ""))
+                },
+                navigationIcon = {
+                    IconButton(onClick = {
+                        navController.popBackStack()
+                    }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                        )
+                    }
                 },
                 actions = {
                     IconButton(

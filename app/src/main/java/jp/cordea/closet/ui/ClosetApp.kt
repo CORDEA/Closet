@@ -8,7 +8,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import jp.cordea.closet.data.ItemType
 import jp.cordea.closet.ui.add_item.AddItem
 import jp.cordea.closet.ui.home.Home
 import jp.cordea.closet.ui.item_details.ItemDetails
@@ -29,9 +28,13 @@ private fun AppNavHost(navController: NavHostController) {
         composable("type-select") {
             TypeSelect(navController)
         }
-        composable("add-item/{type}") {
-            val type = requireNotNull(it.arguments?.getString("type"))
-            AddItem(hiltViewModel(), ItemType.valueOf(type))
+        composable(
+            "add-item/{type}",
+            listOf(navArgument("type") {
+                NavType.StringType
+            })
+        ) {
+            AddItem(navController, hiltViewModel())
         }
         composable(
             "item-details/{id}",
@@ -39,7 +42,7 @@ private fun AppNavHost(navController: NavHostController) {
                 NavType.StringType
             })
         ) {
-            ItemDetails(hiltViewModel())
+            ItemDetails(navController, hiltViewModel())
         }
         composable("settings") {
             Settings()

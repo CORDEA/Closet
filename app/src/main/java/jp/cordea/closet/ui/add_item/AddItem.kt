@@ -20,12 +20,14 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -41,6 +43,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import jp.cordea.closet.data.ItemAttribute
 import jp.cordea.closet.data.ItemType
@@ -49,13 +52,23 @@ import jp.cordea.closet.ui.toLocalizedString
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun AddItem(viewModel: AddItemViewModel, type: ItemType) {
+fun AddItem(navController: NavController, viewModel: AddItemViewModel) {
     val behavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Text(text = "Add Item")
+                },
+                navigationIcon = {
+                    IconButton(onClick = {
+                        navController.popBackStack()
+                    }) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                        )
+                    }
                 },
                 scrollBehavior = behavior
             )
@@ -85,6 +98,7 @@ fun AddItem(viewModel: AddItemViewModel, type: ItemType) {
                     end = padding.calculateEndPadding(layoutDirection),
                 )
         ) {
+            val value by viewModel.state.collectAsState()
             LazyColumn(
                 contentPadding = PaddingValues(
                     top = 16.dp,
@@ -113,7 +127,7 @@ fun AddItem(viewModel: AddItemViewModel, type: ItemType) {
                 item {
                     Field(viewModel, ItemAttribute.SIZE)
                 }
-                content(viewModel, type)
+                content(viewModel, value.type)
                 item {
                     Field(viewModel, ItemAttribute.MATERIAL)
                 }
