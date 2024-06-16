@@ -34,4 +34,7 @@
     <string name="attribute_thigh">Thigh</string>
     <string name="attribute_head_circumference">Head Circumference</string>
     <string name="attribute_tag">Tag</string>
+
+    <string name="created_at">Created</string>
+    <string name="updated_at">Updated</string>
 </resources>
