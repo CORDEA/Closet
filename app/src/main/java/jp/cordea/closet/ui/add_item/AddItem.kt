@@ -1,6 +1,9 @@
 package jp.cordea.closet.ui.add_item
 
-import androidx.compose.foundation.Image
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -36,10 +39,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import jp.cordea.closet.R
+import coil.compose.AsyncImage
 import jp.cordea.closet.data.ItemAttribute
 import jp.cordea.closet.data.ItemType
 import jp.cordea.closet.ui.toLocalizedString
@@ -91,7 +93,7 @@ fun AddItem(viewModel: AddItemViewModel, type: ItemType) {
                     bottom = 32.dp
                 )
             ) {
-                item { Thumbnail() }
+                item { Thumbnail(viewModel) }
                 item {
                     HorizontalDivider(
                         modifier = Modifier.padding(vertical = 16.dp)
@@ -139,16 +141,26 @@ private fun LazyListScope.content(viewModel: AddItemViewModel, type: ItemType) {
 }
 
 @Composable
-private fun Thumbnail() {
+private fun Thumbnail(viewModel: AddItemViewModel) {
+    val value by viewModel.state.collectAsState()
+    val pickMedia = rememberLauncherForActivityResult(
+        ActivityResultContracts.PickVisualMedia(),
+        viewModel::onImageSelected
+    )
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .aspectRatio(ratio = 19f / 10f)
             .clip(RoundedCornerShape(percent = 16))
+            .clickable {
+                pickMedia.launch(
+                    PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                )
+            }
     ) {
-        Image(
+        AsyncImage(
             modifier = Modifier.fillMaxSize(),
-            painter = painterResource(id = R.drawable.ic_launcher_background),
+            model = value.imagePath,
             contentScale = ContentScale.Crop,
             contentDescription = "Thumbnail"
         )

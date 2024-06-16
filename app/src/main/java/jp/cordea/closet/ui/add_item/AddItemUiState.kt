@@ -5,6 +5,7 @@ import jp.cordea.closet.data.ItemType
 
 data class AddItemUiState(
     val type: ItemType = ItemType.TOPS,
+    val imagePath: String = "",
     val values: Map<ItemAttribute, String> = emptyMap(),
     val tags: List<String> = emptyList()
 )

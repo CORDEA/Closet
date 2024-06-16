@@ -1,11 +1,13 @@
 package jp.cordea.closet.ui.add_item
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jp.cordea.closet.data.Item
 import jp.cordea.closet.data.ItemAttribute
 import jp.cordea.closet.repository.ItemRepository
+import jp.cordea.closet.repository.ThumbnailRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -15,7 +17,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AddItemViewModel @Inject constructor(
-    private val repository: ItemRepository
+    private val itemRepository: ItemRepository,
+    private val thumbnailRepository: ThumbnailRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AddItemUiState())
@@ -45,7 +48,7 @@ class AddItemViewModel @Inject constructor(
     fun onAddClicked() {
         val state = _state.value
         viewModelScope.launch {
-            repository.insert(
+            itemRepository.insert(
                 Item(
                     id = UUID.randomUUID().toString(),
                     title = state.values[ItemAttribute.TITLE] ?: "",
@@ -53,7 +56,7 @@ class AddItemViewModel @Inject constructor(
                     type = state.type,
                     createdAt = Date(),
                     updatedAt = Date(),
-                    imagePath = "",
+                    imagePath = state.imagePath,
                     material = state.values[ItemAttribute.MATERIAL] ?: "",
                     size = state.values[ItemAttribute.SIZE] ?: "",
                     bust = state.values[ItemAttribute.BUST]?.toFloatOrNull() ?: 0f,
@@ -76,6 +79,15 @@ class AddItemViewModel @Inject constructor(
                         ?: 0f,
                     tags = state.tags
                 )
+            )
+        }
+    }
+
+    fun onImageSelected(uri: Uri?) {
+        uri?.let {
+            val url = thumbnailRepository.insert(it)
+            _state.value = _state.value.copy(
+                imagePath = url
             )
         }
     }

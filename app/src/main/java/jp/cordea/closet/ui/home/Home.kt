@@ -1,6 +1,5 @@
 package jp.cordea.closet.ui.home
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
@@ -33,11 +32,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import jp.cordea.closet.R
+import coil.compose.AsyncImage
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -126,9 +124,9 @@ private fun Item(navController: NavController, item: HomeItem) {
                 .fillMaxWidth()
                 .aspectRatio(ratio = 19f / 10f)
         ) {
-            Image(
+            AsyncImage(
                 modifier = Modifier.fillMaxSize(),
-                painter = painterResource(id = R.drawable.ic_launcher_background),
+                model = item.imagePath,
                 contentScale = ContentScale.Crop,
                 contentDescription = "Thumbnail"
             )
