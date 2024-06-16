@@ -7,5 +7,6 @@ data class AddItemUiState(
     val type: ItemType = ItemType.TOPS,
     val imagePath: String = "",
     val values: Map<ItemAttribute, String> = emptyMap(),
-    val tags: List<String> = emptyList()
+    val tags: List<String> = emptyList(),
+    val isHomeOpen: Boolean = false
 )

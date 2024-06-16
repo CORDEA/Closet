@@ -90,6 +90,9 @@ class AddItemViewModel @Inject constructor(
                 )
             )
         }
+        _state.value = _state.value.copy(
+            isHomeOpen = true
+        )
     }
 
     fun onImageSelected(uri: Uri?) {
@@ -99,5 +102,11 @@ class AddItemViewModel @Inject constructor(
                 imagePath = url
             )
         }
+    }
+
+    fun onHomeOpened() {
+        _state.value = _state.value.copy(
+            isHomeOpen = false
+        )
     }
 }

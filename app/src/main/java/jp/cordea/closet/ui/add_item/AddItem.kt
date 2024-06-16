@@ -34,6 +34,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -54,6 +55,14 @@ import jp.cordea.closet.ui.toLocalizedString
 @OptIn(ExperimentalMaterial3Api::class)
 fun AddItem(navController: NavController, viewModel: AddItemViewModel) {
     val behavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    val value by viewModel.state.collectAsState()
+    LaunchedEffect(value.isHomeOpen) {
+        if (value.isHomeOpen) {
+            navController.popBackStack(route = "home", inclusive = false)
+            navController.currentBackStackEntry?.savedStateHandle?.set("isAdded", true)
+            viewModel.onHomeOpened()
+        }
+    }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -98,7 +107,6 @@ fun AddItem(navController: NavController, viewModel: AddItemViewModel) {
                     end = padding.calculateEndPadding(layoutDirection),
                 )
         ) {
-            val value by viewModel.state.collectAsState()
             LazyColumn(
                 contentPadding = PaddingValues(
                     top = 16.dp,

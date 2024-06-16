@@ -17,6 +17,14 @@ class HomeViewModel @Inject constructor(
     val state get() = _state.asStateFlow()
 
     init {
+        fetch()
+    }
+
+    fun onAdded() {
+        fetch()
+    }
+
+    private fun fetch() {
         viewModelScope.launch {
             _state.value = HomeUiState.Loaded(
                 items = repository.findAll()

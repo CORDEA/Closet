@@ -25,6 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -41,6 +42,13 @@ import coil.compose.AsyncImage
 @OptIn(ExperimentalMaterial3Api::class)
 fun Home(navController: NavController, viewModel: HomeViewModel) {
     val behavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+    LaunchedEffect(navController) {
+        val handle = navController.currentBackStackEntry?.savedStateHandle
+        val isAdded = handle?.remove<Boolean>("isAdded") ?: false
+        if (isAdded) {
+            viewModel.onAdded()
+        }
+    }
     Scaffold(
         topBar = {
             TopAppBar(
