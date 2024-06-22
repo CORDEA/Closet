@@ -29,9 +29,11 @@ private fun AppNavHost(navController: NavHostController) {
             TypeSelect(navController)
         }
         composable(
-            "add-item/{type}",
+            "add-item?type={type}&id={id}",
             listOf(navArgument("type") {
-                NavType.StringType
+                defaultValue = ""
+            }, navArgument("id") {
+                defaultValue = ""
             })
         ) {
             AddItem(navController, hiltViewModel())

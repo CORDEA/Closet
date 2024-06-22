@@ -32,6 +32,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -54,6 +55,12 @@ import java.util.Date
 @OptIn(ExperimentalMaterial3Api::class)
 fun ItemDetails(navController: NavController, viewModel: ItemDetailsViewModel) {
     val value by viewModel.state.collectAsState()
+    LaunchedEffect(value.isEditOpen) {
+        if (value.isEditOpen) {
+            navController.navigate("add-item?id=${value.id}")
+            viewModel.onEditOpened()
+        }
+    }
     val behavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     Scaffold(
         topBar = {
@@ -73,7 +80,7 @@ fun ItemDetails(navController: NavController, viewModel: ItemDetailsViewModel) {
                 },
                 actions = {
                     IconButton(
-                        onClick = {}
+                        onClick = viewModel::onEditClicked
                     ) {
                         Icon(
                             modifier = Modifier.size(24.dp),

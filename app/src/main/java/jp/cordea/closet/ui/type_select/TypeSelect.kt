@@ -89,7 +89,7 @@ private fun Item(type: ItemType, navController: NavController) {
             .fillMaxWidth()
             .padding(bottom = 12.dp),
         onClick = {
-            navController.navigate("add-item/${type}")
+            navController.navigate("add-item?type=${type}")
         }
     ) {
         Text(

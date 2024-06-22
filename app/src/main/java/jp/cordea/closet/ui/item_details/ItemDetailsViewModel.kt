@@ -25,6 +25,7 @@ class ItemDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             val item = repository.find(id)
             _state.value = ItemDetailsUiState(
+                id = item.id,
                 type = item.type,
                 createdAt = item.createdAt,
                 updatedAt = item.updatedAt,
@@ -54,5 +55,17 @@ class ItemDetailsViewModel @Inject constructor(
                 tags = item.tags
             )
         }
+    }
+
+    fun onEditClicked() {
+        val id = _state.value.id
+        if (id.isBlank()) {
+            return
+        }
+        _state.value = _state.value.copy(isEditOpen = true)
+    }
+
+    fun onEditOpened() {
+        _state.value = _state.value.copy(isEditOpen = false)
     }
 }

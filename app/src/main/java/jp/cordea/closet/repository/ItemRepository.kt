@@ -20,7 +20,7 @@ class ItemRepository @Inject constructor(
 
     suspend fun insert(item: Item) = withContext(Dispatchers.IO) { dao.insert(item) }
 
-    suspend fun update(item: Item) = dao.update(item)
+    suspend fun update(item: Item) = withContext(Dispatchers.IO) { dao.update(item) }
 
     suspend fun delete(id: String) = dao.delete(id)
 }

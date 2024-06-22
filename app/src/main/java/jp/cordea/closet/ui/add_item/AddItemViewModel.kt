@@ -26,11 +26,56 @@ class AddItemViewModel @Inject constructor(
     private val _state = MutableStateFlow(AddItemUiState())
     val state get() = _state.asStateFlow()
 
+    private var editingItem: Item? = null
+
     init {
-        val type = requireNotNull(savedStateHandle.get<String>("type")?.let {
-            ItemType.valueOf(it)
-        })
-        _state.value = _state.value.copy(type = type)
+        init(savedStateHandle)
+    }
+
+    private fun init(savedStateHandle: SavedStateHandle) {
+        val type = savedStateHandle.get<String>("type")?.let {
+            if (it.isBlank()) {
+                null
+            } else {
+                ItemType.valueOf(it)
+            }
+        }
+        if (type != null) {
+            _state.value = _state.value.copy(type = type)
+            return
+        }
+        val id = requireNotNull(savedStateHandle.get<String>("id"))
+        viewModelScope.launch {
+            val item = itemRepository.find(id)
+            editingItem = item
+            _state.value = AddItemUiState(
+                type = item.type,
+                imagePath = item.imagePath,
+                values = mapOf(
+                    ItemAttribute.TITLE to item.title,
+                    ItemAttribute.DESCRIPTION to item.description,
+                    ItemAttribute.MATERIAL to item.material,
+                    ItemAttribute.SIZE to item.size,
+                    ItemAttribute.BUST to item.bust.toString(),
+                    ItemAttribute.LENGTH to item.length.toString(),
+                    ItemAttribute.HEIGHT to item.height.toString(),
+                    ItemAttribute.WIDTH to item.width.toString(),
+                    ItemAttribute.DEPTH to item.depth.toString(),
+                    ItemAttribute.WAIST to item.waist.toString(),
+                    ItemAttribute.HIP to item.hip.toString(),
+                    ItemAttribute.SLEEVE_LENGTH to item.sleeveLength.toString(),
+                    ItemAttribute.SHOULDER_WIDTH to item.shoulderWidth.toString(),
+                    ItemAttribute.NECK_SIZE to item.neckSize.toString(),
+                    ItemAttribute.INSEAM to item.inseam.toString(),
+                    ItemAttribute.RISE to item.rise.toString(),
+                    ItemAttribute.LEG_OPENING to item.legOpening.toString(),
+                    ItemAttribute.KNEE to item.knee.toString(),
+                    ItemAttribute.THIGH to item.thigh.toString(),
+                    ItemAttribute.HEAD_CIRCUMFERENCE to item.headCircumference.toString(),
+                ),
+                tags = item.tags
+            )
+        }
     }
 
     fun onTextChanged(attribute: ItemAttribute, value: String) {
@@ -55,40 +100,44 @@ class AddItemViewModel @Inject constructor(
     }
 
     fun onAddClicked() {
+        val editingItem = editingItem
         val state = _state.value
+        val item = Item(
+            id = editingItem?.id ?: UUID.randomUUID().toString(),
+            title = state.values[ItemAttribute.TITLE] ?: "",
+            description = state.values[ItemAttribute.DESCRIPTION] ?: "",
+            createdAt = editingItem?.createdAt ?: Date(),
+            updatedAt = Date(),
+            type = state.type,
+            imagePath = state.imagePath,
+            material = state.values[ItemAttribute.MATERIAL] ?: "",
+            size = state.values[ItemAttribute.SIZE] ?: "",
+            bust = state.values[ItemAttribute.BUST]?.toFloatOrNull() ?: 0f,
+            length = state.values[ItemAttribute.LENGTH]?.toFloatOrNull() ?: 0f,
+            height = state.values[ItemAttribute.HEIGHT]?.toFloatOrNull() ?: 0f,
+            width = state.values[ItemAttribute.WIDTH]?.toFloatOrNull() ?: 0f,
+            depth = state.values[ItemAttribute.DEPTH]?.toFloatOrNull() ?: 0f,
+            waist = state.values[ItemAttribute.WAIST]?.toFloatOrNull() ?: 0f,
+            hip = state.values[ItemAttribute.HIP]?.toFloatOrNull() ?: 0f,
+            sleeveLength = state.values[ItemAttribute.SLEEVE_LENGTH]?.toFloatOrNull() ?: 0f,
+            shoulderWidth = state.values[ItemAttribute.SHOULDER_WIDTH]?.toFloatOrNull()
+                ?: 0f,
+            neckSize = state.values[ItemAttribute.NECK_SIZE]?.toFloatOrNull() ?: 0f,
+            inseam = state.values[ItemAttribute.INSEAM]?.toFloatOrNull() ?: 0f,
+            rise = state.values[ItemAttribute.RISE]?.toFloatOrNull() ?: 0f,
+            legOpening = state.values[ItemAttribute.LEG_OPENING]?.toFloatOrNull() ?: 0f,
+            knee = state.values[ItemAttribute.KNEE]?.toFloatOrNull() ?: 0f,
+            thigh = state.values[ItemAttribute.THIGH]?.toFloatOrNull() ?: 0f,
+            headCircumference = state.values[ItemAttribute.HEAD_CIRCUMFERENCE]?.toFloatOrNull()
+                ?: 0f,
+            tags = state.tags
+        )
         viewModelScope.launch {
-            itemRepository.insert(
-                Item(
-                    id = UUID.randomUUID().toString(),
-                    title = state.values[ItemAttribute.TITLE] ?: "",
-                    description = state.values[ItemAttribute.DESCRIPTION] ?: "",
-                    type = state.type,
-                    createdAt = Date(),
-                    updatedAt = Date(),
-                    imagePath = state.imagePath,
-                    material = state.values[ItemAttribute.MATERIAL] ?: "",
-                    size = state.values[ItemAttribute.SIZE] ?: "",
-                    bust = state.values[ItemAttribute.BUST]?.toFloatOrNull() ?: 0f,
-                    length = state.values[ItemAttribute.LENGTH]?.toFloatOrNull() ?: 0f,
-                    height = state.values[ItemAttribute.HEIGHT]?.toFloatOrNull() ?: 0f,
-                    width = state.values[ItemAttribute.WIDTH]?.toFloatOrNull() ?: 0f,
-                    depth = state.values[ItemAttribute.DEPTH]?.toFloatOrNull() ?: 0f,
-                    waist = state.values[ItemAttribute.WAIST]?.toFloatOrNull() ?: 0f,
-                    hip = state.values[ItemAttribute.HIP]?.toFloatOrNull() ?: 0f,
-                    sleeveLength = state.values[ItemAttribute.SLEEVE_LENGTH]?.toFloatOrNull() ?: 0f,
-                    shoulderWidth = state.values[ItemAttribute.SHOULDER_WIDTH]?.toFloatOrNull()
-                        ?: 0f,
-                    neckSize = state.values[ItemAttribute.NECK_SIZE]?.toFloatOrNull() ?: 0f,
-                    inseam = state.values[ItemAttribute.INSEAM]?.toFloatOrNull() ?: 0f,
-                    rise = state.values[ItemAttribute.RISE]?.toFloatOrNull() ?: 0f,
-                    legOpening = state.values[ItemAttribute.LEG_OPENING]?.toFloatOrNull() ?: 0f,
-                    knee = state.values[ItemAttribute.KNEE]?.toFloatOrNull() ?: 0f,
-                    thigh = state.values[ItemAttribute.THIGH]?.toFloatOrNull() ?: 0f,
-                    headCircumference = state.values[ItemAttribute.HEAD_CIRCUMFERENCE]?.toFloatOrNull()
-                        ?: 0f,
-                    tags = state.tags
-                )
-            )
+            if (editingItem == null) {
+                itemRepository.insert(item)
+            } else {
+                itemRepository.update(item)
+            }
         }
         _state.value = _state.value.copy(
             isHomeOpen = true

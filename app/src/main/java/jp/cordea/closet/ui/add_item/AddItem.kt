@@ -50,7 +50,6 @@ import jp.cordea.closet.data.ItemAttribute
 import jp.cordea.closet.data.ItemType
 import jp.cordea.closet.ui.toLocalizedString
 
-
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun AddItem(navController: NavController, viewModel: AddItemViewModel) {
