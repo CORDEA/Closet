@@ -22,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AssistChip
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -55,18 +56,12 @@ import java.util.Date
 @OptIn(ExperimentalMaterial3Api::class)
 fun ItemDetails(navController: NavController, viewModel: ItemDetailsViewModel) {
     val value by viewModel.state.collectAsState()
-    LaunchedEffect(value.isEditOpen) {
-        if (value.isEditOpen) {
-            navController.navigate("add-item?id=${value.id}")
-            viewModel.onEditOpened()
-        }
-    }
     val behavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(text = value.values.getOrDefault(ItemAttribute.TITLE, ""))
+                    Text(text = value.title)
                 },
                 navigationIcon = {
                     IconButton(onClick = {
@@ -80,6 +75,7 @@ fun ItemDetails(navController: NavController, viewModel: ItemDetailsViewModel) {
                 },
                 actions = {
                     IconButton(
+                        enabled = value.canEdit,
                         onClick = viewModel::onEditClicked
                     ) {
                         Icon(
@@ -88,6 +84,7 @@ fun ItemDetails(navController: NavController, viewModel: ItemDetailsViewModel) {
                             contentDescription = "Edit"
                         )
                     }
+
                 },
                 scrollBehavior = behavior
             )
@@ -104,69 +101,87 @@ fun ItemDetails(navController: NavController, viewModel: ItemDetailsViewModel) {
                     end = padding.calculateEndPadding(layoutDirection),
                 )
         ) {
-            LazyColumn(
-                contentPadding = PaddingValues(
-                    top = 16.dp,
-                    start = 16.dp,
-                    end = 16.dp,
-                    bottom = 32.dp
-                )
-            ) {
-                item { Thumbnail(viewModel) }
-                item {
-                    HorizontalDivider(
-                        modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
-                    )
-                }
-                item {
-                    Item(viewModel, ItemAttribute.DESCRIPTION)
-                }
-                item {
-                    HorizontalDivider(
-                        modifier = Modifier.padding(vertical = 8.dp)
-                    )
-                }
-                item {
-                    Item(viewModel, ItemAttribute.SIZE)
-                }
-                content(viewModel, value.type)
-                item {
-                    Item(viewModel, ItemAttribute.MATERIAL)
-                }
-                item {
-                    HorizontalDivider(
-                        modifier = Modifier.padding(vertical = 8.dp)
-                    )
-                }
-                item { Tag() }
-                item {
-                    HorizontalDivider(
-                        modifier = Modifier.padding(vertical = 8.dp)
-                    )
-                }
-                item {
-                    DateItem(stringResource(R.string.created_at), value.createdAt)
-                }
-                item {
-                    DateItem(stringResource(R.string.updated_at), value.updatedAt)
-                }
+            when (val e = value) {
+                ItemDetailsUiState.Failed -> TODO()
+                is ItemDetailsUiState.Loaded -> Body(navController, viewModel, e)
+                ItemDetailsUiState.Loading -> CircularProgressIndicator()
             }
         }
     }
 }
 
-private fun LazyListScope.content(viewModel: ItemDetailsViewModel, type: ItemType) {
+@Composable
+private fun Body(
+    navController: NavController,
+    viewModel: ItemDetailsViewModel,
+    value: ItemDetailsUiState.Loaded
+) {
+    LaunchedEffect(value.isEditOpen) {
+        if (value.isEditOpen) {
+            navController.navigate("add-item?id=${value.id}")
+            viewModel.onEditOpened()
+        }
+    }
+    LazyColumn(
+        contentPadding = PaddingValues(
+            top = 16.dp,
+            start = 16.dp,
+            end = 16.dp,
+            bottom = 32.dp
+        )
+    ) {
+        item { Thumbnail(value) }
+        item {
+            HorizontalDivider(
+                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+            )
+        }
+        item {
+            Item(value, ItemAttribute.DESCRIPTION)
+        }
+        item {
+            HorizontalDivider(
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
+        }
+        item {
+            Item(value, ItemAttribute.SIZE)
+        }
+        content(value, value.type)
+        item {
+            Item(value, ItemAttribute.MATERIAL)
+        }
+        item {
+            HorizontalDivider(
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
+        }
+        item { Tag() }
+        item {
+            HorizontalDivider(
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
+        }
+        item {
+            DateItem(stringResource(R.string.created_at), value.createdAt)
+        }
+        item {
+            DateItem(stringResource(R.string.updated_at), value.updatedAt)
+        }
+    }
+}
+
+private fun LazyListScope.content(value: ItemDetailsUiState.Loaded, type: ItemType) {
     items(
         count = type.attributes.size,
         itemContent = {
-            Item(viewModel, type.attributes.elementAt(it))
+            Item(value, type.attributes.elementAt(it))
         }
     )
 }
 
 @Composable
-private fun Thumbnail(viewModel: ItemDetailsViewModel) {
-    val value by viewModel.state.collectAsState()
+private fun Thumbnail(value: ItemDetailsUiState.Loaded) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -183,8 +198,7 @@ private fun Thumbnail(viewModel: ItemDetailsViewModel) {
 }
 
 @Composable
-private fun Item(viewModel: ItemDetailsViewModel, attribute: ItemAttribute) {
-    val value by viewModel.state.collectAsState()
+private fun Item(value: ItemDetailsUiState.Loaded, attribute: ItemAttribute) {
     Column(modifier = Modifier.padding(vertical = 8.dp)) {
         Text(
             text = attribute.toLocalizedString(),

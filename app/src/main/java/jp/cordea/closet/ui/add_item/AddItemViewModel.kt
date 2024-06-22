@@ -23,7 +23,7 @@ class AddItemViewModel @Inject constructor(
     private val itemRepository: ItemRepository,
     private val thumbnailRepository: ThumbnailRepository
 ) : ViewModel() {
-    private val _state = MutableStateFlow(AddItemUiState())
+    private val _state = MutableStateFlow<AddItemUiState>(AddItemUiState.Loading)
     val state get() = _state.asStateFlow()
 
     private var editingItem: Item? = null
@@ -41,14 +41,14 @@ class AddItemViewModel @Inject constructor(
             }
         }
         if (type != null) {
-            _state.value = _state.value.copy(type = type)
+            _state.value = AddItemUiState.Loaded(type = type)
             return
         }
         val id = requireNotNull(savedStateHandle.get<String>("id"))
         viewModelScope.launch {
             val item = itemRepository.find(id)
             editingItem = item
-            _state.value = AddItemUiState(
+            _state.value = AddItemUiState.Loaded(
                 type = item.type,
                 imagePath = item.imagePath,
                 values = mapOf(
@@ -80,6 +80,9 @@ class AddItemViewModel @Inject constructor(
 
     fun onTextChanged(attribute: ItemAttribute, value: String) {
         val state = _state.value
+        if (state !is AddItemUiState.Loaded) {
+            return
+        }
         _state.value = state.copy(
             values = state.values + (attribute to value)
         )
@@ -90,6 +93,9 @@ class AddItemViewModel @Inject constructor(
             return
         }
         val state = _state.value
+        if (state !is AddItemUiState.Loaded) {
+            return
+        }
         val tag = state.values[ItemAttribute.TAG]
         if (tag.isNullOrBlank()) {
             return
@@ -102,6 +108,9 @@ class AddItemViewModel @Inject constructor(
     fun onAddClicked() {
         val editingItem = editingItem
         val state = _state.value
+        if (state !is AddItemUiState.Loaded) {
+            return
+        }
         val item = Item(
             id = editingItem?.id ?: UUID.randomUUID().toString(),
             title = state.values[ItemAttribute.TITLE] ?: "",
@@ -139,22 +148,28 @@ class AddItemViewModel @Inject constructor(
                 itemRepository.update(item)
             }
         }
-        _state.value = _state.value.copy(
+        _state.value = state.copy(
             isHomeOpen = true
         )
     }
 
     fun onImageSelected(uri: Uri?) {
+        val state = _state.value
+        if (state !is AddItemUiState.Loaded) {
+            return
+        }
         uri?.let {
             val url = thumbnailRepository.insert(it)
-            _state.value = _state.value.copy(
+            _state.value = state.copy(
                 imagePath = url
             )
         }
     }
 
     fun onHomeOpened() {
-        _state.value = _state.value.copy(
+        val state = _state.value
+        require(state is AddItemUiState.Loaded)
+        _state.value = state.copy(
             isHomeOpen = false
         )
     }

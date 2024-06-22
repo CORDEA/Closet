@@ -17,14 +17,14 @@ class ItemDetailsViewModel @Inject constructor(
     private val repository: ItemRepository
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(ItemDetailsUiState())
+    private val _state = MutableStateFlow<ItemDetailsUiState>(ItemDetailsUiState.Loading)
     val state get() = _state.asStateFlow()
 
     init {
         val id = requireNotNull(savedStateHandle.get<String>("id"))
         viewModelScope.launch {
             val item = repository.find(id)
-            _state.value = ItemDetailsUiState(
+            _state.value = ItemDetailsUiState.Loaded(
                 id = item.id,
                 type = item.type,
                 createdAt = item.createdAt,
@@ -58,14 +58,16 @@ class ItemDetailsViewModel @Inject constructor(
     }
 
     fun onEditClicked() {
-        val id = _state.value.id
-        if (id.isBlank()) {
+        val state = _state.value
+        if (state !is ItemDetailsUiState.Loaded || state.id.isBlank()) {
             return
         }
-        _state.value = _state.value.copy(isEditOpen = true)
+        _state.value = state.copy(isEditOpen = true)
     }
 
     fun onEditOpened() {
-        _state.value = _state.value.copy(isEditOpen = false)
+        val state = _state.value
+        require(state is ItemDetailsUiState.Loaded)
+        _state.value = state.copy(isEditOpen = false)
     }
 }

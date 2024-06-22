@@ -23,6 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.AssistChip
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
@@ -55,13 +56,6 @@ import jp.cordea.closet.ui.toLocalizedString
 fun AddItem(navController: NavController, viewModel: AddItemViewModel) {
     val behavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val value by viewModel.state.collectAsState()
-    LaunchedEffect(value.isHomeOpen) {
-        if (value.isHomeOpen) {
-            navController.popBackStack(route = "home", inclusive = false)
-            navController.currentBackStackEntry?.savedStateHandle?.set("isAdded", true)
-            viewModel.onHomeOpened()
-        }
-    }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -82,17 +76,19 @@ fun AddItem(navController: NavController, viewModel: AddItemViewModel) {
             )
         },
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = {
-                    viewModel.onAddClicked()
-                },
-                content = {
-                    Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = "Add"
-                    )
-                }
-            )
+            if (value.canAdd) {
+                FloatingActionButton(
+                    onClick = {
+                        viewModel.onAddClicked()
+                    },
+                    content = {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = "Add"
+                        )
+                    }
+                )
+            }
         },
         modifier = Modifier.nestedScroll(behavior.nestedScrollConnection)
     ) { padding ->
@@ -106,64 +102,87 @@ fun AddItem(navController: NavController, viewModel: AddItemViewModel) {
                     end = padding.calculateEndPadding(layoutDirection),
                 )
         ) {
-            LazyColumn(
-                contentPadding = PaddingValues(
-                    top = 16.dp,
-                    start = 16.dp,
-                    end = 16.dp,
-                    bottom = 32.dp
-                )
-            ) {
-                item { Thumbnail(viewModel) }
-                item {
-                    HorizontalDivider(
-                        modifier = Modifier.padding(vertical = 16.dp)
-                    )
-                }
-                item {
-                    Field(viewModel, ItemAttribute.TITLE)
-                }
-                item {
-                    DescriptionField(viewModel)
-                }
-                item {
-                    HorizontalDivider(
-                        modifier = Modifier.padding(vertical = 16.dp)
-                    )
-                }
-                item {
-                    Field(viewModel, ItemAttribute.SIZE)
-                }
-                content(viewModel, value.type)
-                item {
-                    Field(viewModel, ItemAttribute.MATERIAL)
-                }
-                item {
-                    HorizontalDivider(
-                        modifier = Modifier.padding(vertical = 16.dp)
-                    )
-                }
-                item { Tag() }
-                item {
-                    Field(viewModel, ItemAttribute.TAG)
-                }
+            when (val e = value) {
+                AddItemUiState.Failed -> TODO()
+                is AddItemUiState.Loaded -> Body(navController, viewModel, e)
+                AddItemUiState.Loading -> CircularProgressIndicator()
             }
         }
     }
 }
 
-private fun LazyListScope.content(viewModel: AddItemViewModel, type: ItemType) {
+@Composable
+private fun Body(
+    navController: NavController,
+    viewModel: AddItemViewModel,
+    value: AddItemUiState.Loaded
+) {
+    LaunchedEffect(value.isHomeOpen) {
+        if (value.isHomeOpen) {
+            navController.popBackStack(route = "home", inclusive = false)
+            navController.currentBackStackEntry?.savedStateHandle?.set("isAdded", true)
+            viewModel.onHomeOpened()
+        }
+    }
+    LazyColumn(
+        contentPadding = PaddingValues(
+            top = 16.dp,
+            start = 16.dp,
+            end = 16.dp,
+            bottom = 32.dp
+        )
+    ) {
+        item { Thumbnail(viewModel, value) }
+        item {
+            HorizontalDivider(
+                modifier = Modifier.padding(vertical = 16.dp)
+            )
+        }
+        item {
+            Field(viewModel, value, ItemAttribute.TITLE)
+        }
+        item {
+            DescriptionField(viewModel, value)
+        }
+        item {
+            HorizontalDivider(
+                modifier = Modifier.padding(vertical = 16.dp)
+            )
+        }
+        item {
+            Field(viewModel, value, ItemAttribute.SIZE)
+        }
+        content(viewModel, value, value.type)
+        item {
+            Field(viewModel, value, ItemAttribute.MATERIAL)
+        }
+        item {
+            HorizontalDivider(
+                modifier = Modifier.padding(vertical = 16.dp)
+            )
+        }
+        item { Tag() }
+        item {
+            Field(viewModel, value, ItemAttribute.TAG)
+        }
+    }
+}
+
+private fun LazyListScope.content(
+    viewModel: AddItemViewModel,
+    value: AddItemUiState.Loaded,
+    type: ItemType
+) {
     items(
         count = type.attributes.size,
         itemContent = {
-            Field(viewModel, type.attributes.elementAt(it))
+            Field(viewModel, value, type.attributes.elementAt(it))
         }
     )
 }
 
 @Composable
-private fun Thumbnail(viewModel: AddItemViewModel) {
-    val value by viewModel.state.collectAsState()
+private fun Thumbnail(viewModel: AddItemViewModel, value: AddItemUiState.Loaded) {
     val pickMedia = rememberLauncherForActivityResult(
         ActivityResultContracts.PickVisualMedia(),
         viewModel::onImageSelected
@@ -191,9 +210,9 @@ private fun Thumbnail(viewModel: AddItemViewModel) {
 @Composable
 private fun Field(
     viewModel: AddItemViewModel,
+    value: AddItemUiState.Loaded,
     attribute: ItemAttribute,
 ) {
-    val value by viewModel.state.collectAsState()
     OutlinedTextField(
         modifier = Modifier
             .fillMaxWidth()
@@ -216,8 +235,7 @@ private fun Field(
 }
 
 @Composable
-private fun DescriptionField(viewModel: AddItemViewModel) {
-    val value by viewModel.state.collectAsState()
+private fun DescriptionField(viewModel: AddItemViewModel, value: AddItemUiState.Loaded) {
     OutlinedTextField(
         modifier = Modifier
             .fillMaxWidth()
