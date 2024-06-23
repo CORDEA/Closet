@@ -97,11 +97,14 @@ class AddItemViewModel @Inject constructor(
             return
         }
         val tag = state.values[ItemAttribute.TAG]
-        if (tag.isNullOrBlank()) {
+        if (tag.isNullOrBlank() || tag in state.tags) {
             return
         }
         _state.value = state.copy(
-            tags = state.tags + listOf(tag)
+            tags = state.tags + listOf(tag),
+            values = state.values.toMutableMap().also {
+                it[ItemAttribute.TAG] = ""
+            }
         )
     }
 
@@ -171,6 +174,16 @@ class AddItemViewModel @Inject constructor(
         require(state is AddItemUiState.Loaded)
         _state.value = state.copy(
             isHomeOpen = false
+        )
+    }
+
+    fun onTagClicked(value: String) {
+        val state = _state.value
+        if (state !is AddItemUiState.Loaded) {
+            return
+        }
+        _state.value = state.copy(
+            tags = state.tags - value
         )
     }
 }

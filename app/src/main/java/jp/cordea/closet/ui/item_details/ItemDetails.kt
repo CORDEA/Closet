@@ -160,7 +160,7 @@ private fun Body(
                 modifier = Modifier.padding(vertical = 8.dp)
             )
         }
-        item { Tag() }
+        item { Tag(value) }
         item {
             HorizontalDivider(
                 modifier = Modifier.padding(vertical = 8.dp)
@@ -235,25 +235,16 @@ private fun DateItem(label: String, date: Date) {
 
 @Composable
 @OptIn(ExperimentalLayoutApi::class)
-private fun Tag() {
+private fun Tag(value: ItemDetailsUiState.Loaded) {
     FlowRow {
-        Chip()
-        Chip()
-        Chip()
-        Chip()
-        Chip()
-        Chip()
-        Chip()
+        value.tags.forEach {
+            AssistChip(
+                modifier = Modifier.padding(horizontal = 4.dp),
+                onClick = {},
+                label = { Text(it) }
+            )
+        }
     }
-}
-
-@Composable
-private fun Chip() {
-    AssistChip(
-        modifier = Modifier.padding(horizontal = 4.dp),
-        onClick = { },
-        label = { Text(text = "text") }
-    )
 }
 
 @Preview

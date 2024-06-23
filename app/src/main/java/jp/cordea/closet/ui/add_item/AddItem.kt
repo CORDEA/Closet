@@ -163,7 +163,7 @@ private fun Body(
                 modifier = Modifier.padding(vertical = 16.dp)
             )
         }
-        item { Tag() }
+        item { Tag(viewModel, value) }
         item {
             Field(viewModel, value, ItemAttribute.TAG)
         }
@@ -262,24 +262,22 @@ private fun DescriptionField(viewModel: AddItemViewModel, value: AddItemUiState.
 
 @Composable
 @OptIn(ExperimentalLayoutApi::class)
-private fun Tag() {
+private fun Tag(viewModel: AddItemViewModel, value: AddItemUiState.Loaded) {
     FlowRow {
-        Chip()
-        Chip()
-        Chip()
-        Chip()
-        Chip()
-        Chip()
-        Chip()
+        value.tags.forEach {
+            Chip(viewModel, it)
+        }
     }
 }
 
 @Composable
-private fun Chip() {
+private fun Chip(viewModel: AddItemViewModel, value: String) {
     AssistChip(
         modifier = Modifier.padding(horizontal = 4.dp),
-        onClick = { },
-        label = { Text(text = "text") }
+        onClick = {
+            viewModel.onTagClicked(value)
+        },
+        label = { Text(value) }
     )
 }
 
