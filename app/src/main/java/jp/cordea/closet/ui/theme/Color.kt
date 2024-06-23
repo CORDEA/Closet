@@ -8,7 +8,7 @@ val Black100 = Color(0xffebebeb)
 val Brown300 = Color(0xffac946d)
 val Brown200 = Color(0xffc19d5e)
 val Brown100 = Color(0xffd9c4a0)
-val Brown50 = Color(0xffefe7d9)
+val Brown50 = Color(0xfffff3ed)
 
 val Pink300 = Color(0xfffb8080)
 val Pink200 = Color(0xffffa4a4)

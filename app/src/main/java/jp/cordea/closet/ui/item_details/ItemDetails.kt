@@ -130,19 +130,23 @@ private fun Body(
             bottom = 32.dp
         )
     ) {
-        item { Thumbnail(value) }
-        item {
-            HorizontalDivider(
-                modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
-            )
+        if (value.showThumbnail) {
+            item { Thumbnail(value.imagePath) }
+            item {
+                HorizontalDivider(
+                    modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+                )
+            }
         }
-        item {
-            Item(value, ItemAttribute.DESCRIPTION)
-        }
-        item {
-            HorizontalDivider(
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
+        if (value.showDescription) {
+            item {
+                Item(value, ItemAttribute.DESCRIPTION)
+            }
+            item {
+                HorizontalDivider(
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            }
         }
         item {
             Item(value, ItemAttribute.SIZE)
@@ -181,7 +185,7 @@ private fun LazyListScope.content(value: ItemDetailsUiState.Loaded, type: ItemTy
 }
 
 @Composable
-private fun Thumbnail(value: ItemDetailsUiState.Loaded) {
+private fun Thumbnail(imagePath: String) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -189,7 +193,7 @@ private fun Thumbnail(value: ItemDetailsUiState.Loaded) {
             .clip(RoundedCornerShape(percent = 16))
     ) {
         AsyncImage(
-            model = value.imagePath,
+            model = imagePath,
             modifier = Modifier.fillMaxSize(),
             contentScale = ContentScale.Crop,
             contentDescription = "Thumbnail"

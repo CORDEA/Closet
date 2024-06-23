@@ -16,7 +16,13 @@ sealed class ItemDetailsUiState {
         val values: Map<ItemAttribute, String> = emptyMap(),
         val tags: List<String> = emptyList(),
         val isEditOpen: Boolean = false
-    ) : ItemDetailsUiState()
+    ) : ItemDetailsUiState() {
+
+        val showThumbnail: Boolean get() = imagePath.isNotBlank()
+
+        val showDescription: Boolean
+            get() = values.getOrDefault(ItemAttribute.DESCRIPTION, "").isNotBlank()
+    }
 
     data object Failed : ItemDetailsUiState()
 
