@@ -89,8 +89,14 @@ class AddItemViewModel @Inject constructor(
         if (state !is AddItemUiState.Loaded) {
             return
         }
+        val hasTitleError = if (attribute == ItemAttribute.TITLE && value.isNotBlank()) {
+            false
+        } else {
+            state.hasTitleError
+        }
         _state.value = state.copy(
-            values = state.values + (attribute to value)
+            values = state.values + (attribute to value),
+            hasTitleError = hasTitleError
         )
     }
 
@@ -120,9 +126,14 @@ class AddItemViewModel @Inject constructor(
         if (state !is AddItemUiState.Loaded) {
             return
         }
+        val title = state.values[ItemAttribute.TITLE] ?: ""
+        if (title.isBlank()) {
+            _state.value = state.copy(hasTitleError = true)
+            return
+        }
         val item = Item(
             id = editingItem?.id ?: UUID.randomUUID().toString(),
-            title = state.values[ItemAttribute.TITLE] ?: "",
+            title = title,
             description = state.values[ItemAttribute.DESCRIPTION] ?: "",
             createdAt = editingItem?.createdAt ?: Date(),
             updatedAt = Date(),
@@ -158,7 +169,8 @@ class AddItemViewModel @Inject constructor(
             }
         }
         _state.value = state.copy(
-            isHomeOpen = true
+            isHomeOpen = true,
+            hasTitleError = false
         )
     }
 

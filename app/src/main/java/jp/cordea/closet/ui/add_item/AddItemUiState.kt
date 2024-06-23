@@ -11,6 +11,7 @@ sealed class AddItemUiState {
         val imagePath: String = "",
         val values: Map<ItemAttribute, String> = emptyMap(),
         val tags: List<String> = emptyList(),
+        val hasTitleError: Boolean = false,
         val isHomeOpen: Boolean = false
     ) : AddItemUiState()
 

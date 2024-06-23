@@ -6,6 +6,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
@@ -46,10 +47,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import jp.cordea.closet.R
 import jp.cordea.closet.data.ItemAttribute
 import jp.cordea.closet.data.ItemType
 import jp.cordea.closet.ui.toKeyboardType
@@ -143,7 +146,12 @@ private fun Body(
             )
         }
         item {
-            Field(viewModel, value, ItemAttribute.TITLE)
+            Field(
+                viewModel,
+                value,
+                ItemAttribute.TITLE,
+                if (value.hasTitleError) stringResource(R.string.attribute_title_error) else ""
+            )
         }
         item {
             DescriptionField(viewModel, value)
@@ -218,29 +226,41 @@ private fun Field(
     viewModel: AddItemViewModel,
     value: AddItemUiState.Loaded,
     attribute: ItemAttribute,
+    error: String = ""
 ) {
-    OutlinedTextField(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        shape = CircleShape,
-        label = {
-            Text(text = attribute.toLocalizedString())
-        },
-        value = value.values.getOrDefault(attribute, ""),
-        keyboardActions = KeyboardActions(
-            onDone = {
-                viewModel.onTextSubmitted(attribute)
-            }
-        ),
-        keyboardOptions = KeyboardOptions(
-            keyboardType = attribute.toKeyboardType()
-        ),
-        onValueChange = {
-            viewModel.onTextChanged(attribute, it)
-        },
-        singleLine = true
-    )
+    Column {
+        OutlinedTextField(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp),
+            shape = CircleShape,
+            isError = error.isNotBlank(),
+            label = {
+                Text(text = attribute.toLocalizedString())
+            },
+            value = value.values.getOrDefault(attribute, ""),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    viewModel.onTextSubmitted(attribute)
+                }
+            ),
+            keyboardOptions = KeyboardOptions(
+                keyboardType = attribute.toKeyboardType()
+            ),
+            onValueChange = {
+                viewModel.onTextChanged(attribute, it)
+            },
+            singleLine = true
+        )
+        if (error.isNotBlank()) {
+            Text(
+                modifier = Modifier.padding(horizontal = 8.dp),
+                text = error,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error
+            )
+        }
+    }
 }
 
 @Composable
