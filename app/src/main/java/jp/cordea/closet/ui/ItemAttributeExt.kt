@@ -2,6 +2,7 @@ package jp.cordea.closet.ui
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardType
 import jp.cordea.closet.R
 import jp.cordea.closet.data.ItemAttribute
 import jp.cordea.closet.data.ItemAttribute.BUST
@@ -50,5 +51,32 @@ fun ItemAttribute.toLocalizedString(): String {
         TAG -> stringResource(R.string.attribute_tag)
         TITLE -> stringResource(R.string.attribute_title)
         DESCRIPTION -> stringResource(R.string.attribute_description)
+    }
+}
+
+fun ItemAttribute.toKeyboardType(): KeyboardType {
+    return when (this) {
+        MATERIAL,
+        SIZE,
+        TAG,
+        TITLE,
+        DESCRIPTION -> KeyboardType.Text
+
+        BUST,
+        LENGTH,
+        HEIGHT,
+        WIDTH,
+        DEPTH,
+        WAIST,
+        HIP,
+        SLEEVE_LENGTH,
+        SHOULDER_WIDTH,
+        NECK_SIZE,
+        INSEAM,
+        RISE,
+        LEG_OPENING,
+        KNEE,
+        THIGH,
+        HEAD_CIRCUMFERENCE -> KeyboardType.Number
     }
 }

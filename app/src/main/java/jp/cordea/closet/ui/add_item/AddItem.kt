@@ -20,6 +20,7 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
@@ -51,6 +52,7 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import jp.cordea.closet.data.ItemAttribute
 import jp.cordea.closet.data.ItemType
+import jp.cordea.closet.ui.toKeyboardType
 import jp.cordea.closet.ui.toLocalizedString
 
 @Composable
@@ -231,6 +233,9 @@ private fun Field(
                 viewModel.onTextSubmitted(attribute)
             }
         ),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = attribute.toKeyboardType()
+        ),
         onValueChange = {
             viewModel.onTextChanged(attribute, it)
         },
@@ -253,6 +258,9 @@ private fun DescriptionField(viewModel: AddItemViewModel, value: AddItemUiState.
             onDone = {
                 viewModel.onTextSubmitted(ItemAttribute.DESCRIPTION)
             }
+        ),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = ItemAttribute.DESCRIPTION.toKeyboardType()
         ),
         onValueChange = {
             viewModel.onTextChanged(ItemAttribute.DESCRIPTION, it)

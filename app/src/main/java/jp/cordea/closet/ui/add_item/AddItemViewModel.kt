@@ -1,6 +1,7 @@
 package jp.cordea.closet.ui.add_item
 
 import android.net.Uri
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -10,6 +11,7 @@ import jp.cordea.closet.data.ItemAttribute
 import jp.cordea.closet.data.ItemType
 import jp.cordea.closet.repository.ItemRepository
 import jp.cordea.closet.repository.ThumbnailRepository
+import jp.cordea.closet.ui.toKeyboardType
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -79,6 +81,10 @@ class AddItemViewModel @Inject constructor(
     }
 
     fun onTextChanged(attribute: ItemAttribute, value: String) {
+        val type = attribute.toKeyboardType()
+        if (type == KeyboardType.Number && value.isNotEmpty() && value.toDoubleOrNull() == null) {
+            return
+        }
         val state = _state.value
         if (state !is AddItemUiState.Loaded) {
             return
