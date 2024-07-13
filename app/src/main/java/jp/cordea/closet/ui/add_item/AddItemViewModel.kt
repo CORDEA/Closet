@@ -50,7 +50,14 @@ class AddItemViewModel @Inject constructor(
         }
         val id = requireNotNull(id)
         viewModelScope.launch {
-            val item = itemRepository.find(id)
+            val result = runCatching {
+                itemRepository.find(id)
+            }
+            val item = result.getOrNull()
+            if (item == null) {
+                _state.value = AddItemUiState.Failed
+                return@launch
+            }
             editingItem = item
             _state.value = AddItemUiState.Loaded(
                 type = item.type,

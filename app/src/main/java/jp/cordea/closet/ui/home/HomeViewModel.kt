@@ -26,10 +26,14 @@ class HomeViewModel @Inject constructor(
 
     private fun fetch() {
         viewModelScope.launch {
-            _state.value = HomeUiState.Loaded(
-                items = repository.findAll()
-                    .map { HomeItem(it.id, it.title, it.imagePath) }
-            )
+            runCatching {
+                _state.value = HomeUiState.Loaded(
+                    items = repository.findAll()
+                        .map { HomeItem(it.id, it.title, it.imagePath) }
+                )
+            }.onFailure {
+                _state.value = HomeUiState.Failed
+            }
         }
     }
 
