@@ -1,5 +1,6 @@
 package jp.cordea.closet.ui.add_item
 
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -52,6 +53,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -145,6 +147,15 @@ private fun Body(
             navController.popBackStack(route = "home", inclusive = false)
             navController.currentBackStackEntry?.savedStateHandle?.set("isAdded", true)
             viewModel.onHomeOpened()
+        }
+    }
+    val context = LocalContext.current
+    LaunchedEffect(value.hasAddingError) {
+        if (value.hasAddingError) {
+            Toast
+                .makeText(context, R.string.add_failure_error, Toast.LENGTH_SHORT)
+                .show()
+            viewModel.onAddingErrorShown()
         }
     }
     LazyColumn(

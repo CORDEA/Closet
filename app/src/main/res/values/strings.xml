@@ -42,4 +42,6 @@
 
     <string name="load_failure_body">Failed to load data</string>
     <string name="load_failure_button">Reload</string>
+
+    <string name="add_failure_error">Failed to add an item</string>
 </resources>

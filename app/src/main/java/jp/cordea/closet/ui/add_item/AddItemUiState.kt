@@ -12,6 +12,7 @@ sealed class AddItemUiState {
         val values: Map<ItemAttribute, String> = emptyMap(),
         val tags: List<String> = emptyList(),
         val hasTitleError: Boolean = false,
+        val hasAddingError: Boolean = false,
         val isHomeOpen: Boolean = false
     ) : AddItemUiState()
 

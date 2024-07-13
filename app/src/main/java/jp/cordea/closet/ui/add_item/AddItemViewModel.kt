@@ -140,6 +140,7 @@ class AddItemViewModel @Inject constructor(
             _state.value = state.copy(hasTitleError = true)
             return
         }
+        _state.value = state.copy(hasTitleError = false)
         val item = Item(
             id = editingItem?.id ?: UUID.randomUUID().toString(),
             title = title,
@@ -171,16 +172,18 @@ class AddItemViewModel @Inject constructor(
             tags = state.tags
         )
         viewModelScope.launch {
-            if (editingItem == null) {
-                itemRepository.insert(item)
-            } else {
-                itemRepository.update(item)
+            runCatching {
+                if (editingItem == null) {
+                    itemRepository.insert(item)
+                } else {
+                    itemRepository.update(item)
+                }
+            }.onFailure {
+                _state.value = state.copy(hasAddingError = true)
+            }.onSuccess {
+                _state.value = state.copy(isHomeOpen = true)
             }
         }
-        _state.value = state.copy(
-            isHomeOpen = true,
-            hasTitleError = false
-        )
     }
 
     fun onImageSelected(uri: Uri?) {
@@ -216,5 +219,13 @@ class AddItemViewModel @Inject constructor(
 
     fun onReload() {
         load()
+    }
+
+    fun onAddingErrorShown() {
+        val state = _state.value
+        if (state !is AddItemUiState.Loaded) {
+            return
+        }
+        _state.value = state.copy(hasAddingError = false)
     }
 }
