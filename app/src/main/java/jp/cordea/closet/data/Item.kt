@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 import java.util.Date
 
 @Entity
-class Item(
+data class Item(
     @PrimaryKey val id: String,
     @ColumnInfo(name = "type") val type: ItemType,
     @ColumnInfo(name = "created_at") val createdAt: Date,
