@@ -10,11 +10,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
@@ -83,7 +85,7 @@ fun AddItem(navController: NavController, viewModel: AddItemViewModel) {
             )
         },
         floatingActionButton = {
-            if (value.canAdd) {
+            if (value.canAdd && !WindowInsets.isImeVisible) {
                 FloatingActionButton(
                     onClick = {
                         viewModel.onAddClicked()
