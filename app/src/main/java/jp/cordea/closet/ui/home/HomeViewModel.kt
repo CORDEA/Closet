@@ -32,4 +32,8 @@ class HomeViewModel @Inject constructor(
             )
         }
     }
+
+    fun onReload() {
+        fetch()
+    }
 }

@@ -28,25 +28,27 @@ class AddItemViewModel @Inject constructor(
     private val _state = MutableStateFlow<AddItemUiState>(AddItemUiState.Loading)
     val state get() = _state.asStateFlow()
 
+    private val type: ItemType? = savedStateHandle.get<String>("type")?.let {
+        if (it.isBlank()) {
+            null
+        } else {
+            ItemType.valueOf(it)
+        }
+    }
+    private val id: String? = savedStateHandle.get<String>("id")
+
     private var editingItem: Item? = null
 
     init {
-        init(savedStateHandle)
+        load()
     }
 
-    private fun init(savedStateHandle: SavedStateHandle) {
-        val type = savedStateHandle.get<String>("type")?.let {
-            if (it.isBlank()) {
-                null
-            } else {
-                ItemType.valueOf(it)
-            }
-        }
+    private fun load() {
         if (type != null) {
             _state.value = AddItemUiState.Loaded(type = type)
             return
         }
-        val id = requireNotNull(savedStateHandle.get<String>("id"))
+        val id = requireNotNull(id)
         viewModelScope.launch {
             val item = itemRepository.find(id)
             editingItem = item
@@ -203,5 +205,9 @@ class AddItemViewModel @Inject constructor(
         _state.value = state.copy(
             tags = state.tags - value
         )
+    }
+
+    fun onReload() {
+        load()
     }
 }

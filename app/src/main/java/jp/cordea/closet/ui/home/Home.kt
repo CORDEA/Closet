@@ -1,18 +1,22 @@
 package jp.cordea.closet.ui.home
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.calculateEndPadding
 import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -33,10 +37,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
+import jp.cordea.closet.R
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -97,7 +103,17 @@ fun Home(navController: NavController, viewModel: HomeViewModel) {
         ) {
             val state by viewModel.state.collectAsState()
             when (val e = state) {
-                HomeUiState.Failed -> TODO()
+                HomeUiState.Failed -> Column(
+                    modifier = Modifier.align(Alignment.Center),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(stringResource(R.string.load_failure_body))
+                    Spacer(Modifier.height(32.dp))
+                    Button(onClick = viewModel::onReload) {
+                        Text(stringResource(R.string.load_failure_button))
+                    }
+                }
+
                 is HomeUiState.Loaded -> LazyColumn(
                     contentPadding = PaddingValues(
                         top = 16.dp,

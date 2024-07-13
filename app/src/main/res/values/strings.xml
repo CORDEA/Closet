@@ -39,4 +39,7 @@
 
     <string name="created_at">Created</string>
     <string name="updated_at">Updated</string>
+
+    <string name="load_failure_body">Failed to load data</string>
+    <string name="load_failure_button">Reload</string>
 </resources>
