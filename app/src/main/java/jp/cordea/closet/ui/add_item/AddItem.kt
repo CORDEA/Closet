@@ -1,5 +1,6 @@
 package jp.cordea.closet.ui.add_item
 
+import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -22,7 +23,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.isImeVisible
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -62,7 +62,6 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import jp.cordea.closet.R
 import jp.cordea.closet.data.ItemAttribute
-import jp.cordea.closet.data.ItemType
 import jp.cordea.closet.ui.toKeyboardType
 import jp.cordea.closet.ui.toLocalizedString
 
@@ -137,21 +136,22 @@ fun AddItem(navController: NavController, viewModel: AddItemViewModel) {
 }
 
 @Composable
+@OptIn(ExperimentalLayoutApi::class)
 private fun Body(
     navController: NavController,
     viewModel: AddItemViewModel,
-    value: AddItemUiState.Loaded
+    state: AddItemUiState.Loaded
 ) {
-    LaunchedEffect(value.isHomeOpen) {
-        if (value.isHomeOpen) {
+    LaunchedEffect(state.isHomeOpen) {
+        if (state.isHomeOpen) {
             navController.popBackStack(route = "home", inclusive = false)
             navController.currentBackStackEntry?.savedStateHandle?.set("isAdded", true)
             viewModel.onHomeOpened()
         }
     }
     val context = LocalContext.current
-    LaunchedEffect(value.hasAddingError) {
-        if (value.hasAddingError) {
+    LaunchedEffect(state.hasAddingError) {
+        if (state.hasAddingError) {
             Toast
                 .makeText(context, R.string.add_failure_error, Toast.LENGTH_SHORT)
                 .show()
@@ -166,7 +166,7 @@ private fun Body(
             bottom = 32.dp
         )
     ) {
-        item { Thumbnail(viewModel, value) }
+        item { Thumbnail(state, viewModel::onImageSelected) }
         item {
             HorizontalDivider(
                 modifier = Modifier.padding(vertical = 16.dp)
@@ -174,14 +174,19 @@ private fun Body(
         }
         item {
             Field(
-                viewModel,
-                value,
+                state,
                 ItemAttribute.TITLE,
-                if (value.hasTitleError) stringResource(R.string.attribute_title_error) else ""
+                onTextChange = { viewModel.onTextChanged(ItemAttribute.TITLE, it) },
+                onTextSubmit = { viewModel.onTextSubmitted(ItemAttribute.TITLE) },
+                error = if (state.hasTitleError) stringResource(R.string.attribute_title_error) else "",
             )
         }
         item {
-            DescriptionField(viewModel, value)
+            DescriptionField(
+                state,
+                onTextChange = { viewModel.onTextChanged(ItemAttribute.DESCRIPTION, it) },
+                onTextSubmit = { viewModel.onTextSubmitted(ItemAttribute.DESCRIPTION) }
+            )
         }
         item {
             HorizontalDivider(
@@ -189,42 +194,60 @@ private fun Body(
             )
         }
         item {
-            Field(viewModel, value, ItemAttribute.SIZE)
+            Field(state, ItemAttribute.SIZE,
+                onTextChange = { viewModel.onTextChanged(ItemAttribute.SIZE, it) },
+                onTextSubmit = { viewModel.onTextSubmitted(ItemAttribute.SIZE) }
+            )
         }
-        content(viewModel, value, value.type)
+        items(
+            count = state.type.attributes.size,
+            itemContent = {
+                val attr = state.type.attributes.elementAt(it)
+                Field(
+                    state,
+                    attr,
+                    onTextChange = { viewModel.onTextChanged(attr, it) },
+                    onTextSubmit = { viewModel.onTextSubmitted(attr) }
+                )
+            }
+        )
         item {
-            Field(viewModel, value, ItemAttribute.MATERIAL)
+            Field(
+                state,
+                ItemAttribute.MATERIAL,
+                onTextChange = { viewModel.onTextChanged(ItemAttribute.MATERIAL, it) },
+                onTextSubmit = { viewModel.onTextSubmitted(ItemAttribute.MATERIAL) }
+            )
         }
         item {
             HorizontalDivider(
                 modifier = Modifier.padding(vertical = 16.dp)
             )
         }
-        item { Tag(viewModel, value) }
         item {
-            Field(viewModel, value, ItemAttribute.TAG)
+            FlowRow {
+                state.tags.forEach {
+                    Chip(it) {
+                    }
+                }
+            }
+        }
+        item {
+            Field(
+                state,
+                ItemAttribute.TAG,
+                onTextChange = { viewModel.onTextChanged(ItemAttribute.TAG, it) },
+                onTextSubmit = { viewModel.onTextSubmitted(ItemAttribute.TAG) }
+            )
         }
     }
 }
 
-private fun LazyListScope.content(
-    viewModel: AddItemViewModel,
-    value: AddItemUiState.Loaded,
-    type: ItemType
-) {
-    items(
-        count = type.attributes.size,
-        itemContent = {
-            Field(viewModel, value, type.attributes.elementAt(it))
-        }
-    )
-}
-
 @Composable
-private fun Thumbnail(viewModel: AddItemViewModel, value: AddItemUiState.Loaded) {
+private fun Thumbnail(state: AddItemUiState.Loaded, onImageSelect: (Uri?) -> Unit) {
     val pickMedia = rememberLauncherForActivityResult(
         ActivityResultContracts.PickVisualMedia(),
-        viewModel::onImageSelected
+        onImageSelect,
     )
     Box(
         modifier = Modifier
@@ -241,7 +264,7 @@ private fun Thumbnail(viewModel: AddItemViewModel, value: AddItemUiState.Loaded)
             modifier = Modifier
                 .fillMaxSize()
                 .background(MaterialTheme.colorScheme.surfaceVariant),
-            model = value.imagePath,
+            model = state.imagePath,
             contentScale = ContentScale.Crop,
             contentDescription = "Thumbnail"
         )
@@ -250,9 +273,10 @@ private fun Thumbnail(viewModel: AddItemViewModel, value: AddItemUiState.Loaded)
 
 @Composable
 private fun Field(
-    viewModel: AddItemViewModel,
-    value: AddItemUiState.Loaded,
+    state: AddItemUiState.Loaded,
     attribute: ItemAttribute,
+    onTextSubmit: () -> Unit,
+    onTextChange: (String) -> Unit,
     error: String = ""
 ) {
     Column {
@@ -265,18 +289,14 @@ private fun Field(
             label = {
                 Text(text = attribute.toLocalizedString())
             },
-            value = value.values.getOrDefault(attribute, ""),
+            value = state.values.getOrDefault(attribute, ""),
             keyboardActions = KeyboardActions(
-                onDone = {
-                    viewModel.onTextSubmitted(attribute)
-                }
+                onDone = { onTextSubmit() }
             ),
             keyboardOptions = KeyboardOptions(
                 keyboardType = attribute.toKeyboardType()
             ),
-            onValueChange = {
-                viewModel.onTextChanged(attribute, it)
-            },
+            onValueChange = onTextChange,
             singleLine = true
         )
         if (error.isNotBlank()) {
@@ -291,7 +311,11 @@ private fun Field(
 }
 
 @Composable
-private fun DescriptionField(viewModel: AddItemViewModel, value: AddItemUiState.Loaded) {
+private fun DescriptionField(
+    state: AddItemUiState.Loaded,
+    onTextSubmit: () -> Unit,
+    onTextChange: (String) -> Unit
+) {
     OutlinedTextField(
         modifier = Modifier
             .fillMaxWidth()
@@ -300,38 +324,22 @@ private fun DescriptionField(viewModel: AddItemViewModel, value: AddItemUiState.
         label = {
             Text(text = ItemAttribute.DESCRIPTION.toLocalizedString())
         },
-        value = value.values.getOrDefault(ItemAttribute.DESCRIPTION, ""),
+        value = state.values.getOrDefault(ItemAttribute.DESCRIPTION, ""),
         keyboardActions = KeyboardActions(
-            onDone = {
-                viewModel.onTextSubmitted(ItemAttribute.DESCRIPTION)
-            }
+            onDone = { onTextSubmit() }
         ),
         keyboardOptions = KeyboardOptions(
             keyboardType = ItemAttribute.DESCRIPTION.toKeyboardType()
         ),
-        onValueChange = {
-            viewModel.onTextChanged(ItemAttribute.DESCRIPTION, it)
-        },
+        onValueChange = onTextChange
     )
 }
 
 @Composable
-@OptIn(ExperimentalLayoutApi::class)
-private fun Tag(viewModel: AddItemViewModel, value: AddItemUiState.Loaded) {
-    FlowRow {
-        value.tags.forEach {
-            Chip(viewModel, it)
-        }
-    }
-}
-
-@Composable
-private fun Chip(viewModel: AddItemViewModel, value: String) {
+private fun Chip(value: String, onClick: () -> Unit) {
     AssistChip(
         modifier = Modifier.padding(horizontal = 4.dp),
-        onClick = {
-            viewModel.onTagClicked(value)
-        },
+        onClick = onClick,
         label = { Text(value) }
     )
 }

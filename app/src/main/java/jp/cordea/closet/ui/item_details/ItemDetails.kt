@@ -114,11 +114,11 @@ fun ItemDetails(navController: NavController, viewModel: ItemDetailsViewModel) {
 private fun Body(
     navController: NavController,
     viewModel: ItemDetailsViewModel,
-    value: ItemDetailsUiState.Loaded
+    state: ItemDetailsUiState.Loaded
 ) {
-    LaunchedEffect(value.isEditOpen) {
-        if (value.isEditOpen) {
-            navController.navigate("add-item?id=${value.id}")
+    LaunchedEffect(state.isEditOpen) {
+        if (state.isEditOpen) {
+            navController.navigate("add-item?id=${state.id}")
             viewModel.onEditOpened()
         }
     }
@@ -130,17 +130,17 @@ private fun Body(
             bottom = 32.dp
         )
     ) {
-        if (value.showThumbnail) {
-            item { Thumbnail(value.imagePath) }
+        if (state.showThumbnail) {
+            item { Thumbnail(state.imagePath) }
             item {
                 HorizontalDivider(
                     modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
                 )
             }
         }
-        if (value.showDescription) {
+        if (state.showDescription) {
             item {
-                Item(value, ItemAttribute.DESCRIPTION)
+                Item(state, ItemAttribute.DESCRIPTION)
             }
             item {
                 HorizontalDivider(
@@ -149,37 +149,37 @@ private fun Body(
             }
         }
         item {
-            Item(value, ItemAttribute.SIZE)
+            Item(state, ItemAttribute.SIZE)
         }
-        content(value, value.type)
+        content(state, state.type)
         item {
-            Item(value, ItemAttribute.MATERIAL)
+            Item(state, ItemAttribute.MATERIAL)
         }
         item {
             HorizontalDivider(
                 modifier = Modifier.padding(vertical = 8.dp)
             )
         }
-        item { Tag(value) }
+        item { Tag(state) }
         item {
             HorizontalDivider(
                 modifier = Modifier.padding(vertical = 8.dp)
             )
         }
         item {
-            DateItem(stringResource(R.string.created_at), value.createdAt)
+            DateItem(stringResource(R.string.created_at), state.createdAt)
         }
         item {
-            DateItem(stringResource(R.string.updated_at), value.updatedAt)
+            DateItem(stringResource(R.string.updated_at), state.updatedAt)
         }
     }
 }
 
-private fun LazyListScope.content(value: ItemDetailsUiState.Loaded, type: ItemType) {
+private fun LazyListScope.content(state: ItemDetailsUiState.Loaded, type: ItemType) {
     items(
         count = type.attributes.size,
         itemContent = {
-            Item(value, type.attributes.elementAt(it))
+            Item(state, type.attributes.elementAt(it))
         }
     )
 }
@@ -202,7 +202,7 @@ private fun Thumbnail(imagePath: String) {
 }
 
 @Composable
-private fun Item(value: ItemDetailsUiState.Loaded, attribute: ItemAttribute) {
+private fun Item(state: ItemDetailsUiState.Loaded, attribute: ItemAttribute) {
     Column(modifier = Modifier.padding(vertical = 8.dp)) {
         Text(
             text = attribute.toLocalizedString(),
@@ -212,7 +212,7 @@ private fun Item(value: ItemDetailsUiState.Loaded, attribute: ItemAttribute) {
         Text(
             modifier = Modifier.padding(start = 16.dp),
             style = MaterialTheme.typography.bodyLarge,
-            text = value.values.getOrDefault(attribute, ""),
+            text = state.values.getOrDefault(attribute, ""),
         )
     }
 }
@@ -235,9 +235,9 @@ private fun DateItem(label: String, date: Date) {
 
 @Composable
 @OptIn(ExperimentalLayoutApi::class)
-private fun Tag(value: ItemDetailsUiState.Loaded) {
+private fun Tag(state: ItemDetailsUiState.Loaded) {
     FlowRow {
-        value.tags.forEach {
+        state.tags.forEach {
             AssistChip(
                 modifier = Modifier.padding(horizontal = 4.dp),
                 onClick = {},

@@ -124,7 +124,9 @@ fun Home(navController: NavController, viewModel: HomeViewModel) {
                 ) {
                     e.items.forEach {
                         item {
-                            Item(navController, it)
+                            Item(it) {
+                                navController.navigate("item-details/${it.id}")
+                            }
                         }
                     }
                 }
@@ -136,12 +138,10 @@ fun Home(navController: NavController, viewModel: HomeViewModel) {
 }
 
 @Composable
-private fun Item(navController: NavController, item: HomeItem) {
+private fun Item(item: HomeItem, onClick: () -> Unit) {
     Card(
         modifier = Modifier.padding(vertical = 8.dp),
-        onClick = {
-            navController.navigate("item-details/${item.id}")
-        }
+        onClick = onClick
     ) {
         Box(
             modifier = Modifier
