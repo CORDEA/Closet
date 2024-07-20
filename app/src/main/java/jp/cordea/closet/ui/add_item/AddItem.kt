@@ -67,7 +67,7 @@ import jp.cordea.closet.ui.toKeyboardType
 import jp.cordea.closet.ui.toLocalizedString
 
 @Composable
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 fun AddItem(navController: NavController, viewModel: AddItemViewModel) {
     val behavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     val value by viewModel.state.collectAsState()
