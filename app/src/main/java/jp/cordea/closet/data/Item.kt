@@ -3,7 +3,10 @@ package jp.cordea.closet.data
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import java.text.NumberFormat
 import java.util.Date
+
+private val formatter = NumberFormat.getInstance()
 
 @Entity
 data class Item(
@@ -33,4 +36,29 @@ data class Item(
     @ColumnInfo(name = "thigh") val thigh: Float,
     @ColumnInfo(name = "head_circumference") val headCircumference: Float,
     @ColumnInfo(name = "tags") val tags: List<String>
-)
+) {
+    fun asMap(): Map<ItemAttribute, String> {
+        return mapOf(
+            ItemAttribute.TITLE to title,
+            ItemAttribute.DESCRIPTION to description,
+            ItemAttribute.MATERIAL to material,
+            ItemAttribute.SIZE to size,
+            ItemAttribute.BUST to formatter.format(bust),
+            ItemAttribute.LENGTH to formatter.format(length),
+            ItemAttribute.HEIGHT to formatter.format(height),
+            ItemAttribute.WIDTH to formatter.format(width),
+            ItemAttribute.DEPTH to formatter.format(depth),
+            ItemAttribute.WAIST to formatter.format(waist),
+            ItemAttribute.HIP to formatter.format(hip),
+            ItemAttribute.SLEEVE_LENGTH to formatter.format(sleeveLength),
+            ItemAttribute.SHOULDER_WIDTH to formatter.format(shoulderWidth),
+            ItemAttribute.NECK_SIZE to formatter.format(neckSize),
+            ItemAttribute.INSEAM to formatter.format(inseam),
+            ItemAttribute.RISE to formatter.format(rise),
+            ItemAttribute.LEG_OPENING to formatter.format(legOpening),
+            ItemAttribute.KNEE to formatter.format(knee),
+            ItemAttribute.THIGH to formatter.format(thigh),
+            ItemAttribute.HEAD_CIRCUMFERENCE to formatter.format(headCircumference),
+        )
+    }
+}
