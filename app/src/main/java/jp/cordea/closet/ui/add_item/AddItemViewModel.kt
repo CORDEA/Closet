@@ -28,14 +28,14 @@ class AddItemViewModel @Inject constructor(
     private val _state = MutableStateFlow<AddItemUiState>(AddItemUiState.Loading)
     val state get() = _state.asStateFlow()
 
-    private val type: ItemType? = savedStateHandle.get<String>("type")?.let {
+    private val type = savedStateHandle.get<String>("type")?.let {
         if (it.isBlank()) {
             null
         } else {
             ItemType.valueOf(it)
         }
     }
-    private val id: String? = savedStateHandle.get<String>("id")
+    private val id = savedStateHandle.get<String>("id")
 
     private var editingItem: Item? = null
 
