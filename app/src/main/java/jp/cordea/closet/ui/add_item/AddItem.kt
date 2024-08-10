@@ -29,6 +29,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
@@ -254,20 +255,28 @@ private fun Thumbnail(state: AddItemUiState.Loaded, onImageSelect: (Uri?) -> Uni
             .fillMaxWidth()
             .aspectRatio(ratio = 19f / 10f)
             .clip(RoundedCornerShape(percent = 16))
+            .background(MaterialTheme.colorScheme.surfaceVariant)
             .clickable {
                 pickMedia.launch(
                     PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
                 )
             }
     ) {
-        AsyncImage(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.surfaceVariant),
-            model = state.imagePath,
-            contentScale = ContentScale.Crop,
-            contentDescription = "Thumbnail"
-        )
+        if (state.imagePath.isBlank()) {
+            Icon(
+                modifier = Modifier.align(Alignment.Center),
+                imageVector = Icons.Filled.AddCircle,
+                contentDescription = "Add"
+            )
+        } else {
+            AsyncImage(
+                modifier = Modifier.fillMaxSize(),
+                model = state.imagePath,
+                contentScale = ContentScale.Crop,
+                contentDescription = "Thumbnail"
+            )
+        }
+
     }
 }
 
