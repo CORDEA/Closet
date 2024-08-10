@@ -13,7 +13,6 @@ fun ItemType.toLocalizedString(): String {
         ItemType.PANTS -> stringResource(R.string.type_pants)
         ItemType.SKIRTS -> stringResource(R.string.type_skirts)
         ItemType.DRESSES -> stringResource(R.string.type_dresses)
-        ItemType.SWIMWEAR -> stringResource(R.string.type_swimwear)
         ItemType.SHOES -> stringResource(R.string.type_shoes)
         ItemType.BAGS -> stringResource(R.string.type_bags)
         ItemType.HATS -> stringResource(R.string.type_hats)

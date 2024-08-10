@@ -49,10 +49,6 @@ enum class ItemType(val attributes: Set<ItemAttribute>) {
             ItemAttribute.NECK_SIZE
         )
     ),
-    SWIMWEAR(
-        setOf(
-        )
-    ),
     SHOES(
         setOf(ItemAttribute.WIDTH)
     ),
