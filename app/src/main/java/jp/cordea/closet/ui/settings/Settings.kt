@@ -1,5 +1,6 @@
 package jp.cordea.closet.ui.settings
 
+import android.content.Intent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.calculateEndPadding
@@ -19,9 +20,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
+import jp.cordea.closet.R
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -48,12 +53,12 @@ fun Settings() {
                     end = padding.calculateEndPadding(layoutDirection),
                 )
         ) {
+            val context = LocalContext.current
             LazyColumn {
                 item {
-                    Item()
-                }
-                item {
-                    Item()
+                    Item(stringResource(R.string.settings_oss)) {
+                        context.startActivity(Intent(context, OssLicensesMenuActivity::class.java))
+                    }
                 }
             }
         }
@@ -61,19 +66,21 @@ fun Settings() {
 }
 
 @Composable
-private fun Item() {
+private fun Item(title: String, onClick: () -> Unit) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(min = 56.dp)
-            .clickable { }
+            .clickable {
+                onClick()
+            }
     ) {
         Text(
             modifier = Modifier
                 .align(Alignment.CenterStart)
                 .padding(vertical = 8.dp, horizontal = 16.dp),
             style = MaterialTheme.typography.bodyMedium,
-            text = "Text"
+            text = title
         )
     }
 }

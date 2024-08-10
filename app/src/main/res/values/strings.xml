@@ -44,4 +44,6 @@
     <string name="load_failure_button">Reload</string>
 
     <string name="add_failure_error">Failed to add an item</string>
+
+    <string name="settings_oss">Open source licenses</string>
 </resources>
