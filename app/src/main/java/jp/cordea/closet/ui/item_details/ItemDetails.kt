@@ -22,6 +22,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.AssistChip
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -36,6 +37,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -102,7 +104,17 @@ fun ItemDetails(navController: NavController, viewModel: ItemDetailsViewModel) {
                 )
         ) {
             when (val e = value) {
-                ItemDetailsUiState.Failed -> TODO()
+                ItemDetailsUiState.Failed -> Column(
+                    modifier = Modifier.align(Alignment.Center),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(stringResource(R.string.load_failure_body))
+                    Spacer(Modifier.height(32.dp))
+                    Button(onClick = viewModel::onReload) {
+                        Text(stringResource(R.string.load_failure_button))
+                    }
+                }
+
                 is ItemDetailsUiState.Loaded -> Body(navController, viewModel, e)
                 ItemDetailsUiState.Loading -> CircularProgressIndicator()
             }
