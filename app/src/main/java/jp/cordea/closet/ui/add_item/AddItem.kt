@@ -229,6 +229,7 @@ private fun Body(
             FlowRow {
                 state.tags.forEach {
                     Chip(it) {
+                        viewModel.onTagClicked(it)
                     }
                 }
             }
