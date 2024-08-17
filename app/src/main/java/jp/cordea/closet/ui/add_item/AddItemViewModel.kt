@@ -38,6 +38,7 @@ class AddItemViewModel @Inject constructor(
     private val id = savedStateHandle.get<String>("id")
 
     private var editingItem: Item? = null
+    private var thumbnail: Uri? = null
 
     init {
         load()
@@ -120,6 +121,24 @@ class AddItemViewModel @Inject constructor(
             return
         }
         _state.value = state.copy(hasTitleError = false)
+        val oldImagePath = editingItem?.imagePath
+        var newImagePath = oldImagePath ?: ""
+        val thumbnail = thumbnail
+        if (thumbnail != null) {
+            runCatching {
+                newImagePath = thumbnailRepository.insert(thumbnail)
+            }.onFailure {
+                _state.value = state.copy(hasAddingError = true)
+                return
+            }
+            if (oldImagePath != null) {
+                runCatching {
+                    thumbnailRepository.delete(oldImagePath)
+                }.onFailure {
+                    // TODO
+                }
+            }
+        }
         val item = Item(
             id = editingItem?.id ?: UUID.randomUUID().toString(),
             title = title,
@@ -127,7 +146,7 @@ class AddItemViewModel @Inject constructor(
             createdAt = editingItem?.createdAt ?: Date(),
             updatedAt = Date(),
             type = state.type,
-            imagePath = state.imagePath,
+            imagePath = newImagePath,
             material = state.values[ItemAttribute.MATERIAL] ?: "",
             size = state.values[ItemAttribute.SIZE] ?: "",
             bust = state.values[ItemAttribute.BUST]?.toFloatOrNull() ?: 0f,
@@ -171,10 +190,8 @@ class AddItemViewModel @Inject constructor(
             return
         }
         uri?.let {
-            val url = thumbnailRepository.insert(it)
-            _state.value = state.copy(
-                imagePath = url
-            )
+            thumbnail = it
+            _state.value = state.copy(imagePath = it.toString())
         }
     }
 

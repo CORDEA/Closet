@@ -22,4 +22,8 @@ class ThumbnailRepository @Inject constructor(
         }
         return File(context.filesDir, id).absolutePath
     }
+
+    fun delete(url: String) {
+        context.deleteFile(url)
+    }
 }
