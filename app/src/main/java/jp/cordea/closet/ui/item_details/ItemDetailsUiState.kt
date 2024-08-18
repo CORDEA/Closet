@@ -15,7 +15,10 @@ sealed class ItemDetailsUiState {
         val imagePath: String = "",
         val values: Map<ItemAttribute, String> = emptyMap(),
         val tags: List<String> = emptyList(),
-        val isEditOpen: Boolean = false
+        val isEditOpen: Boolean = false,
+        val isHomeOpen: Boolean = false,
+        val isDeleteDialogOpen: Boolean = false,
+        val hasDeletingError: Boolean = false
     ) : ItemDetailsUiState() {
 
         val showThumbnail: Boolean get() = imagePath.isNotBlank()

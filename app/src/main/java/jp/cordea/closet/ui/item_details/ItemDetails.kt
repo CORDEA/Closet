@@ -1,6 +1,7 @@
 package jp.cordea.closet.ui.item_details
 
 import android.text.format.DateFormat
+import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -20,7 +21,9 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -31,6 +34,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -42,6 +46,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -78,6 +83,16 @@ fun ItemDetails(navController: NavController, viewModel: ItemDetailsViewModel) {
                 actions = {
                     IconButton(
                         enabled = value.canEdit,
+                        onClick = viewModel::onDeleteClicked
+                    ) {
+                        Icon(
+                            modifier = Modifier.size(24.dp),
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Delete"
+                        )
+                    }
+                    IconButton(
+                        enabled = value.canEdit,
                         onClick = viewModel::onEditClicked
                     ) {
                         Icon(
@@ -86,7 +101,6 @@ fun ItemDetails(navController: NavController, viewModel: ItemDetailsViewModel) {
                             contentDescription = "Edit"
                         )
                     }
-
                 },
                 scrollBehavior = behavior
             )
@@ -133,6 +147,48 @@ private fun Body(
             navController.navigate("add-item?id=${state.id}")
             viewModel.onEditOpened()
         }
+    }
+    LaunchedEffect(state.isHomeOpen) {
+        if (state.isHomeOpen) {
+            navController.popBackStack()
+            viewModel.onHomeOpened()
+        }
+    }
+    val context = LocalContext.current
+    LaunchedEffect(state.hasDeletingError) {
+        if (state.hasDeletingError) {
+            Toast
+                .makeText(context, R.string.delete_failure_error, Toast.LENGTH_SHORT)
+                .show()
+            viewModel.onDeletingErrorShown()
+        }
+    }
+    if (state.isDeleteDialogOpen) {
+        AlertDialog(
+            onDismissRequest = {
+                viewModel.onDeleteDialogDismissed()
+            },
+            title = {
+                Text(stringResource(R.string.item_details_delete_title))
+            },
+            text = {
+                Text(stringResource(R.string.item_details_delete_body))
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    viewModel.onDeleteDialogConfirmed()
+                }) {
+                    Text(stringResource(R.string.item_details_delete_positive_button))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    viewModel.onDeleteDialogDismissed()
+                }) {
+                    Text(stringResource(R.string.item_details_delete_negative_button))
+                }
+            }
+        )
     }
     LazyColumn(
         contentPadding = PaddingValues(
