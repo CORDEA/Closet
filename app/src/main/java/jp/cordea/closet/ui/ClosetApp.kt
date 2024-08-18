@@ -47,7 +47,7 @@ private fun AppNavHost(navController: NavHostController) {
             ItemDetails(navController, hiltViewModel())
         }
         composable("settings") {
-            Settings()
+            Settings(navController)
         }
     }
 }
