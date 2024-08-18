@@ -223,10 +223,12 @@ private fun Body(
         item {
             Item(state, ItemAttribute.MATERIAL)
         }
-        item {
-            HorizontalDivider(
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
+        if (state.tags.isNotEmpty()) {
+            item {
+                HorizontalDivider(
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            }
         }
         item { Tag(state) }
         item {
