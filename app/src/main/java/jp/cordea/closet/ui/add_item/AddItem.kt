@@ -164,7 +164,7 @@ private fun Body(
             top = 16.dp,
             start = 16.dp,
             end = 16.dp,
-            bottom = 32.dp
+            bottom = 112.dp
         )
     ) {
         item { Thumbnail(state, viewModel::onImageSelected) }
@@ -277,7 +277,6 @@ private fun Thumbnail(state: AddItemUiState.Loaded, onImageSelect: (Uri?) -> Uni
                 contentDescription = "Thumbnail"
             )
         }
-
     }
 }
 
