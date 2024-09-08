@@ -12,6 +12,7 @@ import jp.cordea.closet.ui.add_item.AddItem
 import jp.cordea.closet.ui.home.Home
 import jp.cordea.closet.ui.item_details.ItemDetails
 import jp.cordea.closet.ui.settings.Settings
+import jp.cordea.closet.ui.tagged_items.TaggedItems
 import jp.cordea.closet.ui.type_select.TypeSelect
 
 @Composable
@@ -24,6 +25,14 @@ private fun AppNavHost(navController: NavHostController) {
     NavHost(navController = navController, startDestination = "home") {
         composable("home") {
             Home(navController, hiltViewModel())
+        }
+        composable(
+            "tagged-items?tag={tag}",
+            listOf(navArgument("tag") {
+                defaultValue = ""
+            })
+        ) {
+            TaggedItems(navController, hiltViewModel())
         }
         composable("type-select") {
             TypeSelect(navController)
