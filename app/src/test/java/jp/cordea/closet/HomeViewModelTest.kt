@@ -42,11 +42,13 @@ class HomeViewModelTest {
             every { id } returns "1"
             every { title } returns "title1"
             every { imagePath } returns "image1"
+            every { tags } returns listOf("tag1")
         }
         val item2 = mockk<Item> {
             every { id } returns "2"
             every { title } returns "title2"
             every { imagePath } returns "image2"
+            every { tags } returns listOf("tag2")
         }
         coEvery { repository.findAll() } returns listOf(item1, item2)
 
@@ -58,8 +60,8 @@ class HomeViewModelTest {
             assertThat(results).hasSize(1)
             assertThat((results.first() as HomeUiState.Loaded).items).isEqualTo(
                 listOf(
-                    HomeItem("1", "title1", "image1"),
-                    HomeItem("2", "title2", "image2"),
+                    HomeItem("1", "title1", "image1", listOf("tag1")),
+                    HomeItem("2", "title2", "image2", listOf("tag2")),
                 )
             )
         } finally {

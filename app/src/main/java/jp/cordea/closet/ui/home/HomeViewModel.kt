@@ -29,7 +29,7 @@ class HomeViewModel @Inject constructor(
             runCatching {
                 _state.value = HomeUiState.Loaded(
                     items = repository.findAll()
-                        .map { HomeItem(it.id, it.title, it.imagePath) }
+                        .map { HomeItem(it.id, it.title, it.imagePath, it.tags) }
                 )
             }.onFailure {
                 _state.value = HomeUiState.Failed

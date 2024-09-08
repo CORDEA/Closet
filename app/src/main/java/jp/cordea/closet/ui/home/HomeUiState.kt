@@ -13,5 +13,6 @@ sealed class HomeUiState {
 data class HomeItem(
     val id: String,
     val title: String,
-    val imagePath: String
+    val imagePath: String,
+    val tags: List<String>
 )

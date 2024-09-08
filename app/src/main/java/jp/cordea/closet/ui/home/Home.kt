@@ -2,6 +2,8 @@ package jp.cordea.closet.ui.home
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -16,6 +18,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
@@ -138,6 +141,7 @@ fun Home(navController: NavController, viewModel: HomeViewModel) {
 }
 
 @Composable
+@OptIn(ExperimentalLayoutApi::class)
 private fun Item(item: HomeItem, onClick: () -> Unit) {
     Card(
         modifier = Modifier.padding(vertical = 8.dp),
@@ -154,13 +158,29 @@ private fun Item(item: HomeItem, onClick: () -> Unit) {
                 contentScale = ContentScale.Crop,
                 contentDescription = "Thumbnail"
             )
-            Text(
+            Column(
                 modifier = Modifier
-                    .padding(horizontal = 16.dp, vertical = 12.dp)
-                    .align(Alignment.BottomStart),
-                text = item.title,
-                style = MaterialTheme.typography.headlineSmall
-            )
+                    .align(Alignment.BottomStart)
+                    .padding(vertical = 12.dp),
+            ) {
+                FlowRow(
+                    maxLines = 1,
+                    modifier = Modifier.padding(horizontal = 12.dp)
+                ) {
+                    item.tags.forEach {
+                        AssistChip(
+                            modifier = Modifier.padding(horizontal = 4.dp),
+                            onClick = {},
+                            label = { Text(it) }
+                        )
+                    }
+                }
+                Text(
+                    text = item.title,
+                    style = MaterialTheme.typography.headlineSmall,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+            }
         }
 
     }
