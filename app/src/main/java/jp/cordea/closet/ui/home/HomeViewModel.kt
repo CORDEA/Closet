@@ -24,6 +24,22 @@ class HomeViewModel @Inject constructor(
         fetch()
     }
 
+    fun onSearchExpanded(expanded: Boolean) {
+        val state = _state.value
+        if (state !is HomeUiState.Loaded) {
+            return
+        }
+        _state.value = state.copy(isSearchExpanded = expanded)
+    }
+
+    fun onSearchQueryChanged(query: String) {
+        val state = _state.value
+        if (state !is HomeUiState.Loaded) {
+            return
+        }
+        _state.value = state.copy(searchQuery = query)
+    }
+
     private fun fetch() {
         viewModelScope.launch {
             runCatching {

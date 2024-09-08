@@ -52,4 +52,8 @@
     <string name="item_details_delete_negative_button">Cancel</string>
 
     <string name="settings_oss">Open source licenses</string>
+
+    <string name="home_search_types">Types</string>
+    <string name="home_search_tags">Tags</string>
+    <string name="home_search_placeholder">Search in closet</string>
 </resources>
