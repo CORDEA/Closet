@@ -59,8 +59,9 @@ class AddItemVieModelTest {
         backgroundScope.launch(testDispatcher) { viewModel.state.toList(results) }
 
         try {
-            assertThat(results).hasSize(1)
-            assertThat(results.first()).isEqualTo(AddItemUiState.Loaded(type = ItemType.TOPS))
+            assertThat(results).hasSize(2)
+            assertThat(results[0]).isEqualTo(AddItemUiState.Loading)
+            assertThat(results[1]).isEqualTo(AddItemUiState.Loaded(type = ItemType.TOPS))
         } finally {
             Dispatchers.resetMain()
         }
@@ -97,8 +98,9 @@ class AddItemVieModelTest {
         }
 
         try {
-            assertThat(results).hasSize(1)
-            assertThat(results.first()).isEqualTo(
+            assertThat(results).hasSize(2)
+            assertThat(results[0]).isEqualTo(AddItemUiState.Loading)
+            assertThat(results[1]).isEqualTo(
                 AddItemUiState.Loaded(
                     type = ItemType.TOPS,
                     imagePath = "image",
@@ -149,22 +151,14 @@ class AddItemVieModelTest {
         viewModel.onTextChanged(ItemAttribute.SIZE, "size")
 
         try {
-            assertThat(results).hasSize(5)
-            assertThat(results[0]).isEqualTo(AddItemUiState.Loaded(type = ItemType.OUTERWEAR))
-            assertThat(results[1]).isEqualTo(
-                AddItemUiState.Loaded(
-                    type = ItemType.OUTERWEAR,
-                    values = mapOf(
-                        ItemAttribute.MATERIAL to "material",
-                    )
-                )
-            )
+            assertThat(results).hasSize(6)
+            assertThat(results[0]).isEqualTo(AddItemUiState.Loading)
+            assertThat(results[1]).isEqualTo(AddItemUiState.Loaded(type = ItemType.OUTERWEAR))
             assertThat(results[2]).isEqualTo(
                 AddItemUiState.Loaded(
                     type = ItemType.OUTERWEAR,
                     values = mapOf(
                         ItemAttribute.MATERIAL to "material",
-                        ItemAttribute.SLEEVE_LENGTH to "1.1",
                     )
                 )
             )
@@ -174,11 +168,20 @@ class AddItemVieModelTest {
                     values = mapOf(
                         ItemAttribute.MATERIAL to "material",
                         ItemAttribute.SLEEVE_LENGTH to "1.1",
-                        ItemAttribute.KNEE to "2"
                     )
                 )
             )
             assertThat(results[4]).isEqualTo(
+                AddItemUiState.Loaded(
+                    type = ItemType.OUTERWEAR,
+                    values = mapOf(
+                        ItemAttribute.MATERIAL to "material",
+                        ItemAttribute.SLEEVE_LENGTH to "1.1",
+                        ItemAttribute.KNEE to "2"
+                    )
+                )
+            )
+            assertThat(results[5]).isEqualTo(
                 AddItemUiState.Loaded(
                     type = ItemType.OUTERWEAR,
                     values = mapOf(
@@ -208,7 +211,7 @@ class AddItemVieModelTest {
         viewModel.onAddClicked()
 
         try {
-            assertThat(results[1]).isEqualTo(
+            assertThat(results[2]).isEqualTo(
                 AddItemUiState.Loaded(
                     type = ItemType.OUTERWEAR,
                     hasTitleError = true
@@ -238,7 +241,7 @@ class AddItemVieModelTest {
         viewModel.onAddClicked()
 
         try {
-            assertThat(results[1]).isEqualTo(
+            assertThat(results[2]).isEqualTo(
                 AddItemUiState.Loaded(
                     type = ItemType.OUTERWEAR,
                     values = mapOf(
@@ -246,7 +249,7 @@ class AddItemVieModelTest {
                     )
                 )
             )
-            assertThat(results[2]).isEqualTo(
+            assertThat(results[3]).isEqualTo(
                 AddItemUiState.Loaded(
                     type = ItemType.OUTERWEAR,
                     imagePath = "https://example.com",
@@ -255,7 +258,7 @@ class AddItemVieModelTest {
                     )
                 )
             )
-            assertThat(results[3]).isEqualTo(
+            assertThat(results[4]).isEqualTo(
                 AddItemUiState.Loaded(
                     type = ItemType.OUTERWEAR,
                     imagePath = "https://example.com",
@@ -304,7 +307,7 @@ class AddItemVieModelTest {
         viewModel.onAddClicked()
 
         try {
-            assertThat(results).hasSize(4)
+            assertThat(results).hasSize(5)
 
             verify(exactly = 1) { thumbnailRepository.delete(any()) }
 

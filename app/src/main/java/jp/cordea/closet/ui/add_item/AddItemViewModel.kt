@@ -12,8 +12,19 @@ import jp.cordea.closet.data.ItemType
 import jp.cordea.closet.repository.ItemRepository
 import jp.cordea.closet.repository.ThumbnailRepository
 import jp.cordea.closet.ui.toKeyboardType
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.util.Date
 import java.util.UUID
@@ -25,9 +36,6 @@ class AddItemViewModel @Inject constructor(
     private val itemRepository: ItemRepository,
     private val thumbnailRepository: ThumbnailRepository
 ) : ViewModel() {
-    private val _state = MutableStateFlow<AddItemUiState>(AddItemUiState.Loading)
-    val state get() = _state.asStateFlow()
-
     private val type = savedStateHandle.get<String>("type")?.let {
         if (it.isBlank()) {
             null
@@ -37,98 +45,127 @@ class AddItemViewModel @Inject constructor(
     }
     private val id = savedStateHandle.get<String>("id")
 
-    private var editingItem: Item? = null
-    private var thumbnail: Uri? = null
+    private val retry = Channel<Unit>()
+    private val hasTitleError = MutableStateFlow(false)
+    private val hasAddingError = MutableStateFlow(false)
+    private val isHomeOpen = MutableStateFlow(false)
 
-    init {
-        load()
-    }
-
-    private fun load() {
-        if (type != null) {
-            _state.value = AddItemUiState.Loaded(type = type)
-            return
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val item = retry.receiveAsFlow()
+        .onStart { emit(Unit) }
+        .flatMapLatest {
+            if (type != null) {
+                flowOf(AddItemUiState.Loaded(type = type))
+            } else {
+                flow {
+                    emit(itemRepository.find(requireNotNull(id)))
+                }.map {
+                    initialItem = it
+                    AddItemUiState.Loaded(
+                        type = it.type,
+                        imagePath = it.imagePath,
+                        values = it.asMap(),
+                        tags = it.tags
+                    ) as AddItemUiState
+                }.catch {
+                    emit(AddItemUiState.Failed)
+                }
+            }
         }
-        val id = requireNotNull(id)
-        viewModelScope.launch {
-            val result = runCatching {
-                itemRepository.find(id)
-            }
-            val item = result.getOrNull()
-            if (item == null) {
-                _state.value = AddItemUiState.Failed
-                return@launch
-            }
-            editingItem = item
-            _state.value = AddItemUiState.Loaded(
-                type = item.type,
-                imagePath = item.imagePath,
-                values = item.asMap(),
-                tags = item.tags
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            AddItemUiState.Loading
+        )
+    private val editingValues = MutableStateFlow<Map<ItemAttribute, String>?>(null)
+    private val editingTags = MutableStateFlow<List<String>?>(null)
+    private val editingImagePath = MutableStateFlow<String?>(null)
+
+    val state = combine(
+        item,
+        hasTitleError,
+        hasAddingError,
+        isHomeOpen,
+        combine(
+            editingValues,
+            editingTags,
+            editingImagePath
+        ) { values, tags, path -> Triple(values, tags, path) }
+    ) { item,
+        hasTitleError,
+        hasAddingError,
+        isHomeOpen,
+        editing ->
+        when (item) {
+            AddItemUiState.Failed -> item
+            AddItemUiState.Loading -> item
+            is AddItemUiState.Loaded -> item.copy(
+                hasTitleError = hasTitleError,
+                hasAddingError = hasAddingError,
+                isHomeOpen = isHomeOpen,
+                values = editing.first ?: item.values,
+                tags = editing.second ?: item.tags,
+                imagePath = editing.third ?: item.imagePath
             )
         }
-    }
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        AddItemUiState.Loading
+    )
+
+    private var initialItem: Item? = null
+    private var thumbnail: Uri? = null
 
     fun onTextChanged(attribute: ItemAttribute, value: String) {
         val type = attribute.toKeyboardType()
         if (type == KeyboardType.Number && value.isNotEmpty() && value.toDoubleOrNull() == null) {
             return
         }
-        val state = _state.value
-        if (state !is AddItemUiState.Loaded) {
-            return
-        }
-        val hasTitleError = if (attribute == ItemAttribute.TITLE && value.isNotBlank()) {
+        val state = state.value
+        require(state is AddItemUiState.Loaded)
+        val hasError = if (attribute == ItemAttribute.TITLE && value.isNotBlank()) {
             false
         } else {
-            state.hasTitleError
+            hasTitleError.value
         }
-        _state.value = state.copy(
-            values = state.values + (attribute to value),
-            hasTitleError = hasTitleError
-        )
+        hasTitleError.value = hasError
+        editingValues.value = state.values + (attribute to value)
     }
 
     fun onTextSubmitted(attribute: ItemAttribute) {
         if (attribute != ItemAttribute.TAG) {
             return
         }
-        val state = _state.value
-        if (state !is AddItemUiState.Loaded) {
-            return
-        }
+        val state = state.value
+        require(state is AddItemUiState.Loaded)
         val tag = state.values[ItemAttribute.TAG]
         if (tag.isNullOrBlank() || tag in state.tags) {
             return
         }
-        _state.value = state.copy(
-            tags = state.tags + listOf(tag),
-            values = state.values.toMutableMap().also {
-                it[ItemAttribute.TAG] = ""
-            }
-        )
+        editingTags.value = state.tags + listOf(tag)
+        editingValues.value = state.values.toMutableMap().also {
+            it[ItemAttribute.TAG] = ""
+        }
     }
 
     fun onAddClicked() {
-        val editingItem = editingItem
-        val state = _state.value
-        if (state !is AddItemUiState.Loaded) {
-            return
-        }
+        val state = state.value
+        require(state is AddItemUiState.Loaded)
         val title = state.values[ItemAttribute.TITLE] ?: ""
         if (title.isBlank()) {
-            _state.value = state.copy(hasTitleError = true)
+            hasTitleError.value = true
             return
         }
-        _state.value = state.copy(hasTitleError = false)
-        val oldImagePath = editingItem?.imagePath
+        hasTitleError.value = false
+        val oldImagePath = initialItem?.imagePath
         var newImagePath = oldImagePath ?: ""
         val thumbnail = thumbnail
         if (thumbnail != null) {
             runCatching {
                 newImagePath = thumbnailRepository.insert(thumbnail)
             }.onFailure {
-                _state.value = state.copy(hasAddingError = true)
+                hasAddingError.value = true
                 return
             }
             if (oldImagePath != null) {
@@ -140,10 +177,10 @@ class AddItemViewModel @Inject constructor(
             }
         }
         val item = Item(
-            id = editingItem?.id ?: UUID.randomUUID().toString(),
+            id = initialItem?.id ?: UUID.randomUUID().toString(),
             title = title,
             description = state.values[ItemAttribute.DESCRIPTION] ?: "",
-            createdAt = editingItem?.createdAt ?: Date(),
+            createdAt = initialItem?.createdAt ?: Date(),
             updatedAt = Date(),
             type = state.type,
             imagePath = newImagePath,
@@ -171,57 +208,43 @@ class AddItemViewModel @Inject constructor(
         )
         viewModelScope.launch {
             runCatching {
-                if (editingItem == null) {
+                if (initialItem == null) {
                     itemRepository.insert(item)
                 } else {
                     itemRepository.update(item)
                 }
             }.onFailure {
-                _state.value = state.copy(hasAddingError = true)
+                hasAddingError.value = true
             }.onSuccess {
-                _state.value = state.copy(isHomeOpen = true)
+                isHomeOpen.value = true
             }
         }
     }
 
     fun onImageSelected(uri: Uri?) {
-        val state = _state.value
-        if (state !is AddItemUiState.Loaded) {
-            return
-        }
         uri?.let {
             thumbnail = it
-            _state.value = state.copy(imagePath = it.toString())
+            editingImagePath.value = it.toString()
         }
     }
 
     fun onHomeOpened() {
-        val state = _state.value
-        require(state is AddItemUiState.Loaded)
-        _state.value = state.copy(
-            isHomeOpen = false
-        )
+        isHomeOpen.value = false
     }
 
     fun onTagClicked(value: String) {
-        val state = _state.value
-        if (state !is AddItemUiState.Loaded) {
-            return
-        }
-        _state.value = state.copy(
-            tags = state.tags - value
-        )
+        val state = state.value
+        require(state is AddItemUiState.Loaded)
+        editingTags.value = state.tags - value
     }
 
     fun onReload() {
-        load()
+        viewModelScope.launch {
+            retry.send(Unit)
+        }
     }
 
     fun onAddingErrorShown() {
-        val state = _state.value
-        if (state !is AddItemUiState.Loaded) {
-            return
-        }
-        _state.value = state.copy(hasAddingError = false)
+        hasAddingError.value = false
     }
 }

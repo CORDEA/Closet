@@ -6,8 +6,18 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import jp.cordea.closet.repository.ItemRepository
 import jp.cordea.closet.repository.ThumbnailRepository
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -17,63 +27,80 @@ class ItemDetailsViewModel @Inject constructor(
     private val itemRepository: ItemRepository,
     private val thumbnailRepository: ThumbnailRepository
 ) : ViewModel() {
-    private val _state = MutableStateFlow<ItemDetailsUiState>(ItemDetailsUiState.Loading)
-    val state get() = _state.asStateFlow()
-
     private val id = requireNotNull(savedStateHandle.get<String>("id"))
 
-    init {
-        fetch()
-    }
+    private val retry = Channel<Unit>()
+    private val isEditOpen = MutableStateFlow(false)
+    private val isHomeOpen = MutableStateFlow(false)
+    private val isDeleteDialogOpen = MutableStateFlow(false)
+    private val hasDeletingError = MutableStateFlow(false)
 
-    private fun fetch() {
-        viewModelScope.launch {
-            val item = itemRepository.find(id)
-            _state.value = ItemDetailsUiState.Loaded(
-                id = item.id,
-                type = item.type,
-                createdAt = item.createdAt,
-                updatedAt = item.updatedAt,
-                imagePath = item.imagePath,
-                values = item.asMap(),
-                tags = item.tags
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val item = retry.receiveAsFlow()
+        .onStart { emit(Unit) }
+        .flatMapLatest {
+            flow {
+                emit(itemRepository.find(id))
+            }.map {
+                ItemDetailsUiState.Loaded(
+                    id = it.id,
+                    type = it.type,
+                    createdAt = it.createdAt,
+                    updatedAt = it.updatedAt,
+                    imagePath = it.imagePath,
+                    values = it.asMap(),
+                    tags = it.tags
+                ) as ItemDetailsUiState
+            }.catch {
+                emit(ItemDetailsUiState.Failed)
+            }
+        }
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            ItemDetailsUiState.Loading
+        )
+
+    val state = combine(
+        item, isEditOpen, isHomeOpen, isDeleteDialogOpen, hasDeletingError
+    ) { item, isEditOpen, isHomeOpen, isDeleteDialogOpen, hasDeletingError ->
+        when (item) {
+            ItemDetailsUiState.Failed -> item
+            ItemDetailsUiState.Loading -> item
+            is ItemDetailsUiState.Loaded -> item.copy(
+                isEditOpen = isEditOpen,
+                isHomeOpen = isHomeOpen,
+                isDeleteDialogOpen = isDeleteDialogOpen,
+                hasDeletingError = hasDeletingError
             )
         }
-    }
+    }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        ItemDetailsUiState.Loading
+    )
 
     fun onEditClicked() {
-        val state = _state.value
-        if (state !is ItemDetailsUiState.Loaded) {
-            return
-        }
-        _state.value = state.copy(isEditOpen = true)
+        isEditOpen.value = true
     }
 
     fun onEditOpened() {
-        val state = _state.value
-        require(state is ItemDetailsUiState.Loaded)
-        _state.value = state.copy(isEditOpen = false)
+        isEditOpen.value = false
     }
 
     fun onDeleteClicked() {
-        val state = _state.value
-        if (state !is ItemDetailsUiState.Loaded) {
-            return
-        }
-        _state.value = state.copy(isDeleteDialogOpen = true)
+        isDeleteDialogOpen.value = true
     }
 
     fun onDeleteDialogConfirmed() {
-        val state = _state.value
+        val state = state.value
         require(state is ItemDetailsUiState.Loaded)
         viewModelScope.launch {
             runCatching {
                 itemRepository.delete(state.id)
             }.onFailure {
-                _state.value = state.copy(
-                    isDeleteDialogOpen = false,
-                    hasDeletingError = true
-                )
+                isDeleteDialogOpen.value = false
+                hasDeletingError.value = true
                 return@launch
             }
             runCatching {
@@ -81,32 +108,26 @@ class ItemDetailsViewModel @Inject constructor(
             }.onFailure {
                 // TODO
             }
-            _state.value = state.copy(
-                isDeleteDialogOpen = false,
-                isHomeOpen = true
-            )
+            isDeleteDialogOpen.value = false
+            hasDeletingError.value = true
         }
     }
 
     fun onHomeOpened() {
-        val state = _state.value
-        require(state is ItemDetailsUiState.Loaded)
-        _state.value = state.copy(isHomeOpen = false)
+        isHomeOpen.value = false
     }
 
     fun onDeleteDialogDismissed() {
-        val state = _state.value
-        require(state is ItemDetailsUiState.Loaded)
-        _state.value = state.copy(isDeleteDialogOpen = false)
+        isDeleteDialogOpen.value = false
     }
 
     fun onDeletingErrorShown() {
-        val state = _state.value
-        require(state is ItemDetailsUiState.Loaded)
-        _state.value = state.copy(hasDeletingError = false)
+        hasDeletingError.value = false
     }
 
     fun onReload() {
-        fetch()
+        viewModelScope.launch {
+            retry.send(Unit)
+        }
     }
 }
