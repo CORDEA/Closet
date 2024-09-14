@@ -57,8 +57,9 @@ class HomeViewModelTest {
         backgroundScope.launch(testDispatcher) { viewModel.state.toList(results) }
 
         try {
-            assertThat(results).hasSize(1)
-            assertThat((results.first() as HomeUiState.Loaded).items).isEqualTo(
+            assertThat(results).hasSize(2)
+            assertThat(results[0]).isEqualTo(HomeUiState.Loading)
+            assertThat((results[1] as HomeUiState.Loaded).items).isEqualTo(
                 listOf(
                     HomeItem("1", "title1", "image1", listOf("tag1")),
                     HomeItem("2", "title2", "image2", listOf("tag2")),
@@ -80,8 +81,9 @@ class HomeViewModelTest {
         backgroundScope.launch(testDispatcher) { viewModel.state.toList(results) }
 
         try {
-            assertThat(results).hasSize(1)
-            assertThat(results.first()).isInstanceOf(HomeUiState.Failed::class.java)
+            assertThat(results).hasSize(2)
+            assertThat(results[0]).isEqualTo(HomeUiState.Loading)
+            assertThat(results[1]).isEqualTo(HomeUiState.Failed)
         } finally {
             Dispatchers.resetMain()
         }
