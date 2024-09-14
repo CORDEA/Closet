@@ -202,7 +202,9 @@ fun Home(navController: NavController, viewModel: HomeViewModel) {
                     }
                 }
 
-                HomeUiState.Loading -> CircularProgressIndicator()
+                HomeUiState.Loading -> CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.Center)
+                )
             }
         }
     }
