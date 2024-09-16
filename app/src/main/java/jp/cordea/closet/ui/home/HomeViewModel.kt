@@ -48,20 +48,40 @@ class HomeViewModel @Inject constructor(
                 emit(HomeUiState.Failed)
             }
         }
-        .stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5000),
-            HomeUiState.Loading
-        )
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    private val searchResult = searchQuery
+        .flatMapLatest {
+            flow {
+                emit(repository.findBy("%$it%", emptyList(), emptyList()))
+            }.map {
+                it.map {
+                    HomeItem(
+                        it.id,
+                        it.title,
+                        it.imagePath,
+                        it.tags
+                    )
+                }
+            }.catch {
+                emit(emptyList())
+            }
+        }
 
     val state =
-        combine(searchQuery, isSearchExpanded, items) { query, expanded, items ->
+        combine(
+            searchQuery,
+            isSearchExpanded,
+            items,
+            searchResult
+        ) { query, expanded, items, result ->
             when (items) {
                 HomeUiState.Failed -> items
                 HomeUiState.Loading -> items
                 is HomeUiState.Loaded -> items.copy(
                     searchQuery = query,
-                    isSearchExpanded = expanded
+                    isSearchExpanded = expanded,
+                    searchResult = result
                 )
             }
         }.stateIn(

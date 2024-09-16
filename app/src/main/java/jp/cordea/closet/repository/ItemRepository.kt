@@ -14,6 +14,9 @@ class ItemRepository @Inject constructor(
 ) {
     suspend fun findAll(): List<Item> = withContext(Dispatchers.IO) { dao.findAll() }
 
+    suspend fun findBy(title: String, types: List<ItemType>, tags: List<String>): List<Item> =
+        withContext(Dispatchers.IO) { dao.findBy(title) }
+
     suspend fun find(type: ItemType): List<Item> = dao.findByType(type)
 
     suspend fun find(id: String): Item = dao.find(id)

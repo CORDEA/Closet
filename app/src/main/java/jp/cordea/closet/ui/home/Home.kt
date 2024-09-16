@@ -1,6 +1,7 @@
 package jp.cordea.closet.ui.home
 
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
@@ -13,10 +14,12 @@ import androidx.compose.foundation.layout.calculateStartPadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Close
@@ -145,6 +148,17 @@ fun Home(navController: NavController, viewModel: HomeViewModel) {
                             )
                         }
                     }
+                    item {
+                        Spacer(modifier = Modifier.height(16.dp))
+                    }
+                    val items = when (val e = state) {
+                        HomeUiState.Failed -> emptyList()
+                        is HomeUiState.Loaded -> e.searchResult
+                        HomeUiState.Loading -> emptyList()
+                    }
+                    items(items) {
+                        SearchResult(it) { }
+                    }
                 }
             }
         },
@@ -211,6 +225,26 @@ fun Home(navController: NavController, viewModel: HomeViewModel) {
 }
 
 @Composable
+private fun SearchResult(item: HomeItem, onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 48.dp)
+            .clickable {
+                onClick()
+            }
+    ) {
+        Text(
+            text = item.title,
+            style = MaterialTheme.typography.titleLarge,
+            modifier = Modifier
+                .align(Alignment.CenterStart)
+                .padding(horizontal = 16.dp)
+        )
+    }
+}
+
+@Composable
 @OptIn(ExperimentalLayoutApi::class)
 private fun Item(item: HomeItem, onClick: () -> Unit) {
     Card(
@@ -252,7 +286,6 @@ private fun Item(item: HomeItem, onClick: () -> Unit) {
                 )
             }
         }
-
     }
 }
 

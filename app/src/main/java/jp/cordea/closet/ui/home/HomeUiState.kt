@@ -5,6 +5,7 @@ sealed class HomeUiState {
 
     data class Loaded(
         val items: List<HomeItem> = emptyList(),
+        val searchResult: List<HomeItem> = emptyList(),
         val isSearchExpanded: Boolean = false,
         val searchQuery: String = ""
     ) : HomeUiState()
