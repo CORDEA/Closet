@@ -9,6 +9,8 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.mockk
 import jp.cordea.closet.data.Item
 import jp.cordea.closet.repository.ItemRepository
+import jp.cordea.closet.repository.ItemTypeRepository
+import jp.cordea.closet.repository.TagRepository
 import jp.cordea.closet.ui.home.HomeItem
 import jp.cordea.closet.ui.home.HomeUiState
 import jp.cordea.closet.ui.home.HomeViewModel
@@ -29,7 +31,13 @@ import java.lang.IllegalArgumentException
 @OptIn(ExperimentalCoroutinesApi::class)
 class HomeViewModelTest {
     @MockK
-    private lateinit var repository: ItemRepository
+    private lateinit var itemRepository: ItemRepository
+
+    @MockK
+    private lateinit var tagRepository: TagRepository
+
+    @MockK
+    private lateinit var itemTypeRepository: ItemTypeRepository
 
     @Before
     fun setUp() = MockKAnnotations.init(this)
@@ -50,9 +58,9 @@ class HomeViewModelTest {
             every { imagePath } returns "image2"
             every { tags } returns listOf("tag2")
         }
-        coEvery { repository.findAll() } returns listOf(item1, item2)
+        coEvery { itemRepository.findAll() } returns listOf(item1, item2)
 
-        val viewModel = HomeViewModel(repository)
+        val viewModel = HomeViewModel(itemRepository, itemTypeRepository, tagRepository)
         val results = mutableListOf<HomeUiState>()
         backgroundScope.launch(testDispatcher) { viewModel.state.toList(results) }
 
@@ -74,9 +82,9 @@ class HomeViewModelTest {
     fun `error on init`() = runTest {
         val testDispatcher = UnconfinedTestDispatcher(testScheduler)
         Dispatchers.setMain(testDispatcher)
-        coEvery { repository.findAll() } throws IllegalArgumentException()
+        coEvery { itemRepository.findAll() } throws IllegalArgumentException()
 
-        val viewModel = HomeViewModel(repository)
+        val viewModel = HomeViewModel(itemRepository, itemTypeRepository, tagRepository)
         val results = mutableListOf<HomeUiState>()
         backgroundScope.launch(testDispatcher) { viewModel.state.toList(results) }
 

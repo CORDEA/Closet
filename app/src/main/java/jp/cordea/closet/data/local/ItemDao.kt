@@ -15,8 +15,8 @@ interface ItemDao {
     @Query("SELECT * FROM item WHERE type = :type")
     suspend fun findByType(type: ItemType): List<Item>
 
-    @Query("SELECT * FROM item WHERE title LIKE :title")
-    suspend fun findBy(title: String): List<Item>
+    @Query("SELECT * FROM item WHERE title LIKE :title AND type IN (:types)")
+    suspend fun findBy(title: String, types: Set<ItemType>): List<Item>
 
     @Query("SELECT * FROM item WHERE id = :id")
     suspend fun find(id: String): Item
