@@ -40,8 +40,8 @@ class HomeViewModel @Inject constructor(
         .flatMapLatest {
             flow {
                 emit(itemRepository.findAll())
-            }.map {
-                it.map {
+            }.map { items ->
+                items.map {
                     HomeItem(
                         it.id,
                         it.title,
