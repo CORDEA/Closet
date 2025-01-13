@@ -187,7 +187,9 @@ fun Home(navController: NavController, viewModel: HomeViewModel) {
                         Spacer(modifier = Modifier.height(16.dp))
                     }
                     items(state.searchResult) {
-                        SearchResult(it) { }
+                        SearchResult(it) {
+                            navController.navigate("item-details/${it.id}")
+                        }
                     }
                 }
             }
