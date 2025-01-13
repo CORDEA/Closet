@@ -28,15 +28,12 @@ android {
             useSupportLibrary = true
         }
     }
-
-    val properties = Properties()
-    properties.load(rootProject.file("app.properties").inputStream())
     signingConfigs {
         create("release") {
             storeFile = rootProject.file("release.keystore")
-            storePassword = properties.getProperty("store.password")
-            keyAlias = properties.getProperty("key.alias")
-            keyPassword = properties.getProperty("key.password")
+            storePassword = findProperty("storePassword") as? String
+            keyAlias = findProperty("keyAlias") as? String
+            keyPassword = findProperty("keyPassword") as? String
         }
     }
     buildTypes {
