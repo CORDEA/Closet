@@ -1,10 +1,1 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
-
-    <application tools:ignore="MissingApplicationIcon">
-        <meta-data
-            android:name="io.sentry.environment"
-            android:value="debug"
-            tools:replace="android:value" />
-    </application>
-</manifest>
+<manifest />
