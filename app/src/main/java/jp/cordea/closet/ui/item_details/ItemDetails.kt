@@ -273,7 +273,12 @@ private fun Thumbnail(imagePath: String) {
 
 @Composable
 private fun Item(state: ItemDetailsUiState.Loaded, attribute: ItemAttribute) {
-    Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+    val body = state.values.getOrDefault(attribute, "")
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
+    ) {
         Text(
             text = attribute.toLocalizedString(),
             style = MaterialTheme.typography.bodySmall,
@@ -282,7 +287,7 @@ private fun Item(state: ItemDetailsUiState.Loaded, attribute: ItemAttribute) {
         Text(
             modifier = Modifier.padding(start = 16.dp),
             style = MaterialTheme.typography.bodyLarge,
-            text = state.values.getOrDefault(attribute, ""),
+            text = body.ifBlank { stringResource(R.string.attribute_na) },
         )
     }
 }

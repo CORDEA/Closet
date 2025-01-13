@@ -34,6 +34,7 @@
     <string name="attribute_thigh">Thigh</string>
     <string name="attribute_head_circumference">Head Circumference</string>
     <string name="attribute_tag">Tag</string>
+    <string name="attribute_na">N/A</string>
 
     <string name="attribute_title_error">Title is required</string>
 
