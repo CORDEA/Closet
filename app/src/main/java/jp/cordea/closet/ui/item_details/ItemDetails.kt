@@ -150,7 +150,8 @@ private fun Body(
     }
     LaunchedEffect(state.isHomeOpen) {
         if (state.isHomeOpen) {
-            navController.popBackStack()
+            navController.popBackStack(route = "home", inclusive = false)
+            navController.currentBackStackEntry?.savedStateHandle?.set("isDeleted", true)
             viewModel.onHomeOpened()
         }
     }

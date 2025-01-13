@@ -146,6 +146,10 @@ class HomeViewModel @Inject constructor(
         onReload()
     }
 
+    fun onDeleted() {
+        onReload()
+    }
+
     fun onSearchExpanded(expanded: Boolean) {
         isSearchExpanded.value = expanded
     }

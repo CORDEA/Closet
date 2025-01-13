@@ -68,6 +68,10 @@ fun Home(navController: NavController, viewModel: HomeViewModel) {
         if (isAdded) {
             viewModel.onAdded()
         }
+        val isDeleted = handle?.remove<Boolean>("isDeleted") ?: false
+        if (isDeleted) {
+            viewModel.onDeleted()
+        }
     }
     val state by viewModel.state.collectAsState()
     Scaffold(

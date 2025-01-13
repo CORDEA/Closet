@@ -96,20 +96,18 @@ class ItemDetailsViewModel @Inject constructor(
         val state = state.value
         require(state is ItemDetailsUiState.Loaded)
         viewModelScope.launch {
+            isDeleteDialogOpen.value = false
             runCatching {
                 itemRepository.delete(state.id)
             }.onFailure {
-                isDeleteDialogOpen.value = false
                 hasDeletingError.value = true
                 return@launch
             }
             runCatching {
                 thumbnailRepository.delete(state.imagePath)
-            }.onFailure {
-                // TODO
             }
-            isDeleteDialogOpen.value = false
-            hasDeletingError.value = true
+            hasDeletingError.value = false
+            isHomeOpen.value = true
         }
     }
 
