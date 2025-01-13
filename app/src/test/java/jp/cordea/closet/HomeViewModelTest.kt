@@ -14,6 +14,7 @@ import jp.cordea.closet.repository.TagRepository
 import jp.cordea.closet.ui.home.HomeItem
 import jp.cordea.closet.ui.home.HomeUiState
 import jp.cordea.closet.ui.home.HomeViewModel
+import jp.cordea.closet.ui.home.LoadingState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.toList
@@ -25,7 +26,6 @@ import kotlinx.coroutines.test.setMain
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import java.lang.IllegalArgumentException
 
 @RunWith(AndroidJUnit4::class)
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -66,8 +66,8 @@ class HomeViewModelTest {
 
         try {
             assertThat(results).hasSize(2)
-            assertThat(results[0]).isEqualTo(HomeUiState.Loading)
-            assertThat((results[1] as HomeUiState.Loaded).items).isEqualTo(
+            assertThat(results[0].state).isEqualTo(LoadingState.LOADING)
+            assertThat(results[1].items).isEqualTo(
                 listOf(
                     HomeItem("1", "title1", "image1", listOf("tag1")),
                     HomeItem("2", "title2", "image2", listOf("tag2")),
@@ -90,8 +90,8 @@ class HomeViewModelTest {
 
         try {
             assertThat(results).hasSize(2)
-            assertThat(results[0]).isEqualTo(HomeUiState.Loading)
-            assertThat(results[1]).isEqualTo(HomeUiState.Failed)
+            assertThat(results[0].state).isEqualTo(LoadingState.LOADING)
+            assertThat(results[1].state).isEqualTo(LoadingState.FAILED)
         } finally {
             Dispatchers.resetMain()
         }

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.calculateEndPadding
@@ -28,6 +29,7 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -35,6 +37,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
@@ -53,6 +56,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import jp.cordea.closet.R
+import jp.cordea.closet.data.ItemType
+import jp.cordea.closet.ui.toLocalizedString
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -67,33 +72,26 @@ fun Home(navController: NavController, viewModel: HomeViewModel) {
     val state by viewModel.state.collectAsState()
     Scaffold(
         topBar = {
-            val expanded = when (val e = state) {
-                HomeUiState.Failed -> false
-                is HomeUiState.Loaded -> e.isSearchExpanded
-                HomeUiState.Loading -> false
-            }
-            val query = when (val e = state) {
-                HomeUiState.Failed -> ""
-                is HomeUiState.Loaded -> e.searchQuery
-                HomeUiState.Loading -> ""
-            }
-            val padding by animateDpAsState(if (expanded) 0.dp else 16.dp, label = "Search bar")
+            val padding by animateDpAsState(
+                if (state.isSearchExpanded) 0.dp else 16.dp,
+                label = "Search bar"
+            )
             SearchBar(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = padding),
                 inputField = {
                     SearchBarDefaults.InputField(
-                        query = query,
+                        query = state.searchQuery,
                         onQueryChange = viewModel::onSearchQueryChanged,
                         onSearch = { viewModel.onSearchExpanded(true) },
-                        expanded = expanded,
+                        expanded = state.isSearchExpanded,
                         onExpandedChange = viewModel::onSearchExpanded,
                         placeholder = {
                             Text(stringResource(R.string.home_search_placeholder))
                         },
                         leadingIcon = {
-                            if (expanded) {
+                            if (state.isSearchExpanded) {
                                 IconButton(onClick = {
                                     viewModel.onSearchExpanded(false)
                                     viewModel.onSearchQueryChanged("")
@@ -125,38 +123,70 @@ fun Home(navController: NavController, viewModel: HomeViewModel) {
                         }
                     )
                 },
-                expanded = expanded,
+                expanded = state.isSearchExpanded,
                 onExpandedChange = viewModel::onSearchExpanded
             ) {
+                if (state.showTags) {
+                    TagsController(
+                        state.tags,
+                        onDismiss = {
+                            viewModel.onTagsDismissed()
+                        },
+                        onCheckedChange = { key, selected ->
+                            viewModel.onTagCheckedChanged(key, selected)
+                        }
+                    )
+                }
+                if (state.showTypes) {
+                    TypesController(
+                        state.types,
+                        onDismiss = {
+                            viewModel.onTypesDismissed()
+                        },
+                        onCheckedChange = { key, selected ->
+                            viewModel.onTypeCheckedChanged(key, selected)
+                        }
+                    )
+                }
                 LazyColumn {
-                    item {
-                        FlowRow(modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
-                            FilterChip(
-                                selected = false,
-                                onClick = {},
-                                label = {
-                                    Text(stringResource(R.string.home_search_types))
+                    if (state.typesEnabled || state.tagsEnabled) {
+                        item {
+                            FlowRow(
+                                modifier = Modifier.padding(
+                                    horizontal = 12.dp,
+                                    vertical = 8.dp
+                                )
+                            ) {
+                                if (state.typesEnabled) {
+                                    FilterChip(
+                                        selected = false,
+                                        onClick = {
+                                            viewModel.onTypesClicked()
+                                        },
+                                        label = {
+                                            Text(stringResource(R.string.home_search_types))
+                                        }
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
                                 }
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            FilterChip(
-                                selected = false,
-                                onClick = {},
-                                label = {
-                                    Text(stringResource(R.string.home_search_tags))
+                                if (state.tagsEnabled) {
+                                    FilterChip(
+                                        selected = false,
+                                        onClick = {
+                                            viewModel.onTagsClicked()
+                                        },
+                                        label = {
+                                            Text(stringResource(R.string.home_search_tags))
+                                        }
+                                    )
                                 }
-                            )
+                            }
                         }
                     }
                     item {
                         Spacer(modifier = Modifier.height(16.dp))
                     }
-                    val items = when (val e = state) {
-                        HomeUiState.Failed -> emptyList()
-                        is HomeUiState.Loaded -> e.searchResult
-                        HomeUiState.Loading -> emptyList()
-                    }
-                    items(items) {
+                    items(state.searchResult) {
                         SearchResult(it) { }
                     }
                 }
@@ -186,9 +216,8 @@ fun Home(navController: NavController, viewModel: HomeViewModel) {
                     end = padding.calculateEndPadding(layoutDirection),
                 )
         ) {
-            val state by viewModel.state.collectAsState()
-            when (val e = state) {
-                HomeUiState.Failed -> Column(
+            when (state.state) {
+                LoadingState.FAILED -> Column(
                     modifier = Modifier.align(Alignment.Center),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -199,7 +228,7 @@ fun Home(navController: NavController, viewModel: HomeViewModel) {
                     }
                 }
 
-                is HomeUiState.Loaded -> LazyColumn(
+                LoadingState.LOADED -> LazyColumn(
                     contentPadding = PaddingValues(
                         top = 16.dp,
                         start = 16.dp,
@@ -207,7 +236,7 @@ fun Home(navController: NavController, viewModel: HomeViewModel) {
                         bottom = 32.dp
                     )
                 ) {
-                    e.items.forEach {
+                    state.items.forEach {
                         item {
                             Item(it) {
                                 navController.navigate("item-details/${it.id}")
@@ -216,7 +245,7 @@ fun Home(navController: NavController, viewModel: HomeViewModel) {
                     }
                 }
 
-                HomeUiState.Loading -> CircularProgressIndicator(
+                LoadingState.LOADING -> CircularProgressIndicator(
                     modifier = Modifier.align(Alignment.Center)
                 )
             }
@@ -285,6 +314,78 @@ private fun Item(item: HomeItem, onClick: () -> Unit) {
                     modifier = Modifier.padding(horizontal = 16.dp)
                 )
             }
+        }
+    }
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+private fun TypesController(
+    values: Map<ItemType, Boolean>,
+    onDismiss: () -> Unit,
+    onCheckedChange: (ItemType, Boolean) -> Unit
+) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss
+    ) {
+        LazyColumn(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            items(values.toList()) { (tag, selected) ->
+                SelectableItem(
+                    title = tag.toLocalizedString(),
+                    selected = selected,
+                ) {
+                    onCheckedChange(tag, it)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+private fun TagsController(
+    values: Map<String, Boolean>,
+    onDismiss: () -> Unit,
+    onCheckedChange: (String, Boolean) -> Unit
+) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss
+    ) {
+        LazyColumn(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            items(values.toList()) { (tag, selected) ->
+                SelectableItem(
+                    title = tag,
+                    selected = selected,
+                ) {
+                    onCheckedChange(tag, it)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SelectableItem(
+    title: String,
+    selected: Boolean,
+    onCheckedChange: (Boolean) -> Unit,
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Checkbox(
+                checked = selected,
+                onCheckedChange = onCheckedChange,
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(text = title)
         }
     }
 }

@@ -21,8 +21,6 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-import kotlin.collections.map
-import kotlin.collections.toMap
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
@@ -32,6 +30,8 @@ class HomeViewModel @Inject constructor(
 ) : ViewModel() {
     private val searchQuery = MutableStateFlow("")
     private val isSearchExpanded = MutableStateFlow(false)
+    private val showTypes = MutableStateFlow(false)
+    private val showTags = MutableStateFlow(false)
     private val retry = Channel<Unit>()
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -41,18 +41,14 @@ class HomeViewModel @Inject constructor(
             flow {
                 emit(itemRepository.findAll())
             }.map {
-                HomeUiState.Loaded(
-                    it.map {
-                        HomeItem(
-                            it.id,
-                            it.title,
-                            it.imagePath,
-                            it.tags
-                        )
-                    }
-                ) as HomeUiState
-            }.catch {
-                emit(HomeUiState.Failed)
+                it.map {
+                    HomeItem(
+                        it.id,
+                        it.title,
+                        it.imagePath,
+                        it.tags
+                    )
+                }
             }
         }
 
@@ -61,9 +57,9 @@ class HomeViewModel @Inject constructor(
     }.catch {
         emit(emptyArray())
     }
-    private val selectedTypes = MutableStateFlow<List<ItemType>?>(null)
+    private val selectedTypes = MutableStateFlow<List<ItemType>>(emptyList())
     private val types = combine(allTypes, selectedTypes) { allTypes, selectedTypes ->
-        allTypes.map { it to (selectedTypes?.contains(it) != false) }.toMap()
+        allTypes.associateWith { selectedTypes.contains(it) }
     }
 
     private val allTags = flow {
@@ -71,9 +67,9 @@ class HomeViewModel @Inject constructor(
     }.catch {
         emit(emptyList())
     }
-    private val selectedTags = MutableStateFlow<List<String>?>(null)
+    private val selectedTags = MutableStateFlow<List<String>>(emptyList())
     private val tags = combine(allTags, selectedTags) { allTags, selectedTags ->
-        allTags.map { it to (selectedTags?.contains(it) != false) }.toMap()
+        allTags.associateWith { selectedTags.contains(it) }
     }
 
     @OptIn(ExperimentalCoroutinesApi::class)
@@ -114,24 +110,36 @@ class HomeViewModel @Inject constructor(
                 searchResult ->
                 Triple(searchQuery, isSearchExpanded, searchResult)
             },
-            types,
-            tags
-        ) { items, search, types, tags ->
-            when (items) {
-                HomeUiState.Failed -> items
-                HomeUiState.Loading -> items
-                is HomeUiState.Loaded -> items.copy(
-                    searchQuery = search.first,
-                    isSearchExpanded = search.second,
-                    searchResult = search.third,
-                    tags = tags,
-                    types = types
-                )
+            combine(
+                types,
+                showTypes
+            ) { types, showTypes ->
+                Pair(types, showTypes)
+            },
+            combine(
+                tags,
+                showTags
+            ) { tags, showTags ->
+                Pair(tags, showTags)
             }
+        ) { items, search, types, tags ->
+            HomeUiState(
+                state = LoadingState.LOADED,
+                items = items,
+                searchResult = search.third,
+                searchQuery = search.first,
+                isSearchExpanded = search.second,
+                tags = tags.first,
+                showTags = tags.second,
+                types = types.first,
+                showTypes = types.second
+            )
+        }.catch {
+            emit(HomeUiState(LoadingState.FAILED))
         }.stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(5000),
-            HomeUiState.Loading
+            HomeUiState(LoadingState.LOADING)
         )
 
     fun onAdded() {
@@ -144,6 +152,38 @@ class HomeViewModel @Inject constructor(
 
     fun onSearchQueryChanged(query: String) {
         searchQuery.value = query
+    }
+
+    fun onTypesClicked() {
+        showTypes.value = true
+    }
+
+    fun onTagsClicked() {
+        showTags.value = true
+    }
+
+    fun onTypesDismissed() {
+        showTypes.value = false
+    }
+
+    fun onTagCheckedChanged(key: String, selected: Boolean) {
+        selectedTags.value = if (selected) {
+            selectedTags.value + key
+        } else {
+            selectedTags.value - key
+        }
+    }
+
+    fun onTypeCheckedChanged(key: ItemType, selected: Boolean) {
+        selectedTypes.value = if (selected) {
+            selectedTypes.value + key
+        } else {
+            selectedTypes.value - key
+        }
+    }
+
+    fun onTagsDismissed() {
+        showTags.value = false
     }
 
     fun onReload() {
