@@ -273,7 +273,7 @@ private fun Thumbnail(imagePath: String) {
 
 @Composable
 private fun Item(state: ItemDetailsUiState.Loaded, attribute: ItemAttribute) {
-    Column(modifier = Modifier.padding(vertical = 8.dp)) {
+    Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
         Text(
             text = attribute.toLocalizedString(),
             style = MaterialTheme.typography.bodySmall,
