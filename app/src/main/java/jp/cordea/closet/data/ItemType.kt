@@ -65,5 +65,24 @@ enum class ItemType(val attributes: Set<ItemAttribute>) {
         )
     ),
     RINGS(setOf()),
-    OTHERS(ItemAttribute.entries.toSet())
+    OTHERS(
+        setOf(
+            ItemAttribute.BUST,
+            ItemAttribute.LENGTH,
+            ItemAttribute.HEIGHT,
+            ItemAttribute.WIDTH,
+            ItemAttribute.DEPTH,
+            ItemAttribute.WAIST,
+            ItemAttribute.HIP,
+            ItemAttribute.SLEEVE_LENGTH,
+            ItemAttribute.SHOULDER_WIDTH,
+            ItemAttribute.NECK_SIZE,
+            ItemAttribute.INSEAM,
+            ItemAttribute.RISE,
+            ItemAttribute.LEG_OPENING,
+            ItemAttribute.KNEE,
+            ItemAttribute.THIGH,
+            ItemAttribute.HEAD_CIRCUMFERENCE,
+        )
+    )
 }
