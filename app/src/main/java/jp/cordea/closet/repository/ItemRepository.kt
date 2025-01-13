@@ -15,7 +15,10 @@ class ItemRepository @Inject constructor(
     suspend fun findAll(): List<Item> = withContext(Dispatchers.IO) { dao.findAll() }
 
     suspend fun findBy(title: String, types: Set<ItemType>, tags: Set<String>): List<Item> =
-        withContext(Dispatchers.IO) { dao.findBy(title, types) }
+        withContext(Dispatchers.IO) {
+            val items = dao.findBy(title, types)
+            items.filter { it.tags.containsAll(tags) }
+        }
 
     suspend fun find(type: ItemType): List<Item> = dao.findByType(type)
 
