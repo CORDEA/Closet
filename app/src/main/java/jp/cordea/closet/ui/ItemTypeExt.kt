@@ -1,6 +1,18 @@
 package jp.cordea.closet.ui
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AcUnit
+import androidx.compose.material.icons.filled.Accessibility
+import androidx.compose.material.icons.filled.Category
+import androidx.compose.material.icons.filled.Checkroom
+import androidx.compose.material.icons.filled.Circle
+import androidx.compose.material.icons.filled.Girl
+import androidx.compose.material.icons.filled.IceSkating
+import androidx.compose.material.icons.filled.Nightlight
+import androidx.compose.material.icons.filled.ShoppingBag
+import androidx.compose.material.icons.filled.SmartToy
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import jp.cordea.closet.R
 import jp.cordea.closet.data.ItemType
@@ -18,5 +30,21 @@ fun ItemType.toLocalizedString(): String {
         ItemType.HATS -> stringResource(R.string.type_hats)
         ItemType.RINGS -> stringResource(R.string.type_rings)
         ItemType.OTHERS -> stringResource(R.string.type_others)
+    }
+}
+
+@Composable
+fun ItemType.toIconResource(): ImageVector {
+    return when (this) {
+        ItemType.TOPS -> Icons.Default.Checkroom
+        ItemType.OUTERWEAR -> Icons.Default.AcUnit
+        ItemType.PANTS -> Icons.Default.Accessibility
+        ItemType.SKIRTS -> Icons.Default.Girl
+        ItemType.DRESSES -> Icons.Default.Nightlight
+        ItemType.SHOES -> Icons.Default.IceSkating
+        ItemType.BAGS -> Icons.Default.ShoppingBag
+        ItemType.HATS -> Icons.Default.SmartToy
+        ItemType.RINGS -> Icons.Default.Circle
+        ItemType.OTHERS -> Icons.Default.Category
     }
 }
